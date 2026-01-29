@@ -3,13 +3,13 @@ import { Route,Routes } from 'react-router-dom'
 import SelectRole from './pages/SelectRole'
 import Register from './pages/Registartion'
 import Login from './pages/Login'
-import UserDashboard from './Customer/pages/dashboard'
 import WorkerDashboard from './Worker/pages/dashboard'
 import Home from './pages/Home'
 import PublicLayout from './components/PublicLayout'
 import BuildPC from './Customer/Build/Build-pc'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Profile from './Customer/pages/UserProfile'
 
 function App() {
 
@@ -52,13 +52,14 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<SelectRole />} />
+          <Route path='/user/profile' element={<Profile/>}/>
         </Route>
         
         <Route path="/register/:role" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        <Route path='/user/dashboard' element={<UserDashboard/>}/>
         <Route path='/worker/dashboard' element={<WorkerDashboard/>}/>
+        
 
 
         <Route path='/build' element={<BuildPC/>}/>

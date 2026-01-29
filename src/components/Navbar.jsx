@@ -121,6 +121,7 @@ const Navbar = ({ variant = "dark" }) => {
                   onMouseEnter={openMenu}
                   onMouseLeave={closeMenu}
                   className="hidden sm:flex"
+                  onClick={()=>navigate('user/profile')}
                 >
                   <User className={`w-5 h-5 ${textSub} ${textSubHover} cursor-pointer`} />
                 </div>
@@ -174,7 +175,7 @@ const Navbar = ({ variant = "dark" }) => {
                 </div>
               ) : (
                 <>
-                  <div className="px-4 py-2 text-xs text-white/60">
+                  <div className={`px-4 py-2 text-xs ${textSub}`}>
                     {user.email}
                   </div>
 

@@ -6,6 +6,8 @@ import api from "../api/axios"
 import GoogleAuthButton from "../components/GoogleButton";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+
 
 
 const Login = () => {
@@ -48,8 +50,18 @@ const Login = () => {
 
 
   return (
-    <div className="h-screen flex items-center justify-center bg-slate-100 px-4">
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="h-screen flex items-center justify-center bg-slate-100 px-4"
+        >
+      <motion.div
+            initial={{ y: 40, opacity: 0, scale: 0.95 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="relative w-full max-w-md bg-white rounded-2xl shadow-xl p-8"
+          >
 
         {/* Header */}
         <div className="text-center mb-6">
@@ -153,7 +165,7 @@ const Login = () => {
           </button>
         </form>
           
-      </div>
+      </motion.div>
 
       {openRoleModal && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -203,7 +215,7 @@ const Login = () => {
             mode="login"
           />
 
-    </div>
+    </motion.div>
   );
 };
 

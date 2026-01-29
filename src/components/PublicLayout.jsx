@@ -6,7 +6,7 @@ const PublicLayout = () => {
 
     const { pathname } = useLocation();
 
-    const lightPages = ["/register", "/about"];
+    const lightPages = ["/register", "/about","/user/profile"];
 
     const variant = lightPages.includes(pathname) ? "light" : "dark";
   return (
