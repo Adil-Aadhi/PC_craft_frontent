@@ -25,8 +25,14 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await register(role, form);
-      navigate('/login')
+      const user=await register(role, form);
+       if (user.role === "user") {
+      navigate("/");
+    } else if (user.role === "worker") {
+      navigate("/worker/dashboard");
+    } else if (user.role === "admin") {
+      navigate("/admin/dashboard");
+    }
     } catch (err) {}
   };
 

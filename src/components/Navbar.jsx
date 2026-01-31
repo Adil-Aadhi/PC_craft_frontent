@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Zap, Menu, X, ShoppingCart, User } from "lucide-react";
+import { Zap, Menu, X, ShoppingCart, User,BellDot,MessageCircle,MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -105,16 +105,18 @@ const Navbar = ({ variant = "dark" }) => {
               </Link>
 
               {/* MENU */}
-              <div className={`hidden md:flex gap-8 ${textSub}`}>
+              {/* <div className={`hidden md:flex gap-8 ${textSub}`}>
                 <a className={`${textSubHover}`}>Build</a>
                 <a className={`${textSubHover}`}>Components</a>
                 <a className={`${textSubHover}`}>Gallery</a>
                 <a className={`${textSubHover}`}>Support</a>
-              </div>
+              </div> */}
 
               {/* ACTIONS */}
               <div className="flex items-center gap-4">
+                <MessageSquare className={`w-5 h-5 ${textSub} ${textSubHover}`} />
                 <ShoppingCart className={`w-5 h-5 ${textSub} ${textSubHover}`} />
+                <BellDot className={`w-5 h-5 ${textSub} ${textSubHover}`} />
 
                 <div
                   ref={userRef}

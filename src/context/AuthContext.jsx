@@ -17,6 +17,11 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const res = await api.post(`auth/register/${role}/`, formData);
+
+      const { access, user } = res.data;
+
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("user", JSON.stringify(user));
       toast(
           <div className="flex flex-col">
             <div className="text-sm font-semibold text-white">
@@ -28,7 +33,7 @@ export const AuthProvider = ({ children }) => {
           </div>
         );
 
-      return res.data; // success response
+      return user // success response
     } catch (err) {
       const msg =
       err.response?.data?.error ||

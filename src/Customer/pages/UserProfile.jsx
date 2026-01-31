@@ -8,6 +8,8 @@ import SecurityCard from "../components/ProfileSecurityCard";
 import SessionsCard from "../components/ProfileSessionCard";
 import DangerZoneCard from "../components/ProfileDangerZone";
 import PleaseLogin from "../components/ProfileNoUserLogin";
+import ProfileAvatarCard from "../components/ProfileAvatar";
+import { useAuth } from "../../context/AuthContext";
 
 /* ---------------- ANIMATION VARIANTS ---------------- */
 
@@ -29,6 +31,8 @@ const cardVariants = {
 const ProfilePage = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
 
+  const {handleLogout}=useAuth()
+
   if (!storedUser) {
     return <PleaseLogin />;
   }
@@ -49,14 +53,25 @@ const ProfilePage = () => {
           </div>
 
           <button
-            disabled
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-red-500 opacity-60 cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-red-500 opacity-60"
+            onClick={handleLogout}
           >
             <FiLogOut /> Logout
           </button>
         </div>
 
         {/* ---------------- CARDS (SCROLL ANIMATION) ---------------- */}
+
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          whileHover={{ y: -2 }}
+        >
+          <ProfileAvatarCard />
+        </motion.div>
+
 
         <motion.div
           variants={cardVariants}
