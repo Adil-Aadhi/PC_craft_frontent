@@ -1,5 +1,10 @@
 import axios from "axios";
 
+let isLoggingOut = false;
+
+/* ============================
+   API INSTANCES
+============================ */
 const api = axios.create({
   baseURL: "http://localhost:8000/api/",
   headers: {
@@ -8,20 +13,33 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const refreshApi = axios.create({
+  baseURL: "http://localhost:8000/api/",
+  withCredentials: true,
+});
+
+/* ============================
+   PUBLIC ENDPOINTS
+============================ */
+const PUBLIC_ENDPOINTS = [
+  "auth/login",
+  "auth/register",
+  "auth/refresh",
+  "auth/google",
+];
+
+const isPublicEndpoint = (url = "") =>
+  PUBLIC_ENDPOINTS.some((endpoint) => url.includes(endpoint));
+
 /* ============================
    REQUEST INTERCEPTOR
-   Attach access token
 ============================ */
 api.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("accessToken");
 
-    // 🚫 Do NOT attach token to auth endpoints
-    if (
-      accessToken &&
-      !config.url.includes("auth/login") &&
-      !config.url.includes("auth/refresh")
-    ) {
+    // ✅ Attach token ONLY for protected routes
+    if (accessToken && !isPublicEndpoint(config.url)) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
@@ -32,46 +50,57 @@ api.interceptors.request.use(
 
 /* ============================
    RESPONSE INTERCEPTOR
-   Handle 401 → Refresh token
 ============================ */
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // 🔴 DO NOT retry refresh endpoint itself
-    if (originalRequest.url.includes("auth/refresh")) {
+    // 🛑 Avoid infinite loops
+    if (isLoggingOut || originalRequest?._retry) {
       return Promise.reject(error);
     }
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
+    // 🚫 Never run auth logic for login/register
+    if (isPublicEndpoint(originalRequest?.url)) {
+      return Promise.reject(error);
+    }
+
+    // 🔴 If refresh endpoint itself fails → logout
+    if (originalRequest?.url?.includes("auth/refresh")) {
+      isLoggingOut = true;
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+      return Promise.reject(error);
+    }
+
+    // 🔄 Only retry on 401 Unauthorized
+    if (error.response?.status === 401) {
       originalRequest._retry = true;
 
       try {
-        const res = await api.post("auth/refresh/");
+        const res = await refreshApi.post("auth/refresh/");
         const newAccess = res.data.access;
 
+        // 💾 Save new token
         localStorage.setItem("accessToken", newAccess);
 
-        originalRequest.headers.Authorization =
-          `Bearer ${newAccess}`;
-
+        // 🔁 Retry original request
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // ❌ refresh failed → logout
-        console.log("REFRESH FAILED", refreshError);
+        isLoggingOut = true;
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
         window.location.href = "/login";
+        return Promise.reject(refreshError);
       }
     }
 
+    // ❌ Other errors (400, 403, 404, 500)
     return Promise.reject(error);
   }
 );
-
 
 export default api;

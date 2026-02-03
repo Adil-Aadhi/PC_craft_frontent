@@ -15,13 +15,18 @@ export const AddressProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   // 🔄 Load all addresses
-  const loadAddresses = async () => {
+ const loadAddresses = async () => {
     try {
       setLoading(true);
       const res = await fetchAddresses();
-      setUserAddress(res.data);
+      setUserAddress(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("Error loading addresses", err);
+      if (err.response?.status === 404) {
+        // 👇 VERY IMPORTANT
+        setUserAddress([]);
+      } else {
+        console.error("Error loading addresses", err);
+      }
     } finally {
       setLoading(false);
     }
@@ -33,9 +38,11 @@ export const AddressProvider = ({ children }) => {
       await addAddressApi(data);
       toast.success("Address added successfully");
       loadAddresses();
+      return true; 
     } catch (err) {
       console.error(err);
       toast.error("Failed to add address");
+      return false; 
     }
   };
 
@@ -75,6 +82,8 @@ export const AddressProvider = ({ children }) => {
 }
 
   useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) return;
     loadAddresses();
   }, []);
 

@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; 
+import { useAuth } from "../context/AuthContext";
 
 const GoogleAuthButton = ({ role, trigger = false, mode = "login" }) => {
   const navigate = useNavigate();
+  const { setAccessToken } = useAuth();
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -17,15 +19,16 @@ const GoogleAuthButton = ({ role, trigger = false, mode = "login" }) => {
         },
         { withCredentials: true }
       );
-
-      localStorage.setItem("access", res.data.access);
+      
+      setAccessToken(res.data.access);
+      localStorage.setItem("accessToken", res.data.access);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       // ✅ ROLE-BASED NAVIGATION (WORKS)
       if (res.data.user.role === "worker") {
         navigate("/worker/dashboard", { replace: true });
       } else {
-        navigate("/user/dashboard", { replace: true });
+        navigate("/", { replace: true });
       }
     },
     onError: () => alert("Google login failed"),

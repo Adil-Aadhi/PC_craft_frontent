@@ -1,12 +1,15 @@
 import { createContext,useContext,useState, useEffect } from "react";
 import api from "../../api/axios";
 import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
+
 
 const ProfileContext=createContext();
 
 export const ProfileProvider=({children})=>{
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(false);
+    const { accessToken } = useAuth();
 
     const fetchProfile=async()=>{
         try{
@@ -36,8 +39,9 @@ export const ProfileProvider=({children})=>{
     }
 
      useEffect(() => {
+        if (!accessToken) return;
         fetchProfile();
-    }, []);
+    }, [accessToken]);
 
     return (
     <ProfileContext.Provider value={{ profile,fetchProfile,loading,UpdateProfileInfo }}>

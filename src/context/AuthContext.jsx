@@ -8,6 +8,9 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [accessToken, setAccessToken] = useState(
+        () => localStorage.getItem("accessToken")
+      );
 
   const navigate=useNavigate()
 
@@ -70,6 +73,7 @@ export const AuthProvider = ({ children }) => {
       const { access, user } = res.data;
 
       localStorage.setItem("accessToken",access)
+      setAccessToken(access);
       localStorage.setItem("user", JSON.stringify(user));
 
       const role=res.data.user.role
@@ -129,7 +133,7 @@ export const AuthProvider = ({ children }) => {
 
 
   return (
-    <AuthContext.Provider value={{ register, login, loading, error,handleLogout }}>
+    <AuthContext.Provider value={{accessToken, register, login, loading, error,handleLogout,setAccessToken  }}>
       {children}
     </AuthContext.Provider>
   );
