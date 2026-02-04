@@ -3,13 +3,16 @@ import { Route,Routes } from 'react-router-dom'
 import SelectRole from './pages/SelectRole'
 import Register from './pages/Registartion'
 import Login from './pages/Login'
-import WorkerDashboard from './Worker/pages/dashboard'
 import Home from './pages/Home'
 import PublicLayout from './components/PublicLayout'
 import BuildPC from './Customer/Build/Build-pc'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Profile from './Customer/pages/UserProfile'
+import WorkerDashboard from './Worker/pages/WorkerDashboard'
+import ProtectedRoute from './components/ProtectedRoute'
+import WorkerProfile from './Worker/pages/workerProfile'
+import WorkerLayout from './Worker/layout/workerLayout'
 
 function App() {
 
@@ -49,22 +52,40 @@ function App() {
 
 
      <Routes>
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<SelectRole />} />
-          <Route path='/user/profile' element={<Profile/>}/>
-        </Route>
-        
-        <Route path="/register/:role" element={<Register />} />
-        <Route path="/login" element={<Login />} />
 
-        <Route path='/worker/dashboard' element={<WorkerDashboard/>}/>
-        
+          {/* 🌐 Public */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<SelectRole />} />
+            <Route path="/user/profile" element={<Profile />} />
+          </Route>
 
+          <Route path="/register/:role" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          
+          
 
-        <Route path='/build' element={<BuildPC/>}/>
+          {/* 👤 USER ONLY */}
+          <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
+            <Route path="/build" element={<BuildPC />} />
+          </Route>
 
-      </Routes>
+          {/* 🧑‍🔧 WORKER ONLY */}
+          <Route element={<ProtectedRoute allowedRoles={["worker"]} />}>
+
+            <Route element={<WorkerLayout />}>
+              <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+              <Route path="/worker/profile" element={<WorkerProfile />} />
+            </Route>
+            
+          </Route>
+
+          {/* 👑 ADMIN ONLY */}
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            {/* admin routes here */}
+          </Route>
+
+        </Routes>
     </>
   )
 }

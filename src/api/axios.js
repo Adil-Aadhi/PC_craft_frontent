@@ -1,6 +1,16 @@
 import axios from "axios";
 
 let isLoggingOut = false;
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+  failedQueue = [];
+};
 
 /* ============================
    API INSTANCES
@@ -56,51 +66,66 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 🛑 Avoid infinite loops
-    if (isLoggingOut || originalRequest?._retry) {
+    if (!originalRequest) return Promise.reject(error);
+
+    // 🛑 Stop everything if logout already triggered
+    if (isLoggingOut) {
       return Promise.reject(error);
     }
 
-    // 🚫 Never run auth logic for login/register
-    if (isPublicEndpoint(originalRequest?.url)) {
+    // 🚫 Public endpoints never refresh
+    if (isPublicEndpoint(originalRequest.url)) {
       return Promise.reject(error);
     }
 
-    // 🔴 If refresh endpoint itself fails → logout
-    if (originalRequest?.url?.includes("auth/refresh")) {
-      isLoggingOut = true;
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
-      return Promise.reject(error);
-    }
+    // 🔄 Only handle 401
+    if (error.response?.status === 401 && !originalRequest._retry) {
 
-    // 🔄 Only retry on 401 Unauthorized
-    if (error.response?.status === 401) {
+      // ⏳ If refresh already running → wait
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const res = await refreshApi.post("auth/refresh/");
         const newAccess = res.data.access;
 
-        // 💾 Save new token
+        // 💾 Save token
         localStorage.setItem("accessToken", newAccess);
+        api.defaults.headers.common.Authorization = `Bearer ${newAccess}`;
 
-        // 🔁 Retry original request
+        // 🔓 Release queued requests
+        processQueue(null, newAccess);
+
+        // 🔁 Retry original
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return api(originalRequest);
+
       } catch (refreshError) {
+        processQueue(refreshError, null);
+
         isLoggingOut = true;
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
         window.location.href = "/login";
+
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
-    // ❌ Other errors (400, 403, 404, 500)
     return Promise.reject(error);
   }
 );
+
 
 export default api;
