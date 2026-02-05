@@ -13,6 +13,7 @@ import WorkerDashboard from './Worker/pages/WorkerDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import WorkerProfile from './Worker/pages/workerProfile'
 import WorkerLayout from './Worker/layout/workerLayout'
+import PublicRoute from './components/PublicRoute'
 
 function App() {
 
@@ -53,11 +54,12 @@ function App() {
 
      <Routes>
 
-          {/* 🌐 Public */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/register" element={<SelectRole />} />
-            <Route path="/user/profile" element={<Profile />} />
+          {/* Public */}
+          <Route element={<PublicRoute />}>
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/register" element={<SelectRole />} />
+            </Route>
           </Route>
 
           <Route path="/register/:role" element={<Register />} />
@@ -68,6 +70,7 @@ function App() {
           {/* 👤 USER ONLY */}
           <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
             <Route path="/build" element={<BuildPC />} />
+            <Route path="/user/profile" element={<Profile />} />
           </Route>
 
           {/* 🧑‍🔧 WORKER ONLY */}

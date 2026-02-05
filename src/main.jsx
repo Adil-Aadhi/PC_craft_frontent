@@ -7,6 +7,8 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import { ProfileProvider } from './Customer/context/ProfileContext.jsx'
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AddressProvider } from './Customer/context/UserAddressContext.jsx'
+import { KycProvider } from './Worker/context/KycContext.jsx'
+import { WorkerPersonalInfoProvider } from './Worker/context/workerProfileInfoContext.jsx'
 
 
 createRoot(document.getElementById('root')).render(
@@ -14,11 +16,15 @@ createRoot(document.getElementById('root')).render(
     <GoogleOAuthProvider clientId="1021812662496-03vmmkqsdskasc4paubrhl3j56nt3u5s.apps.googleusercontent.com">
     <BrowserRouter>
     <AuthProvider>
+      <KycProvider>
       <ProfileProvider>
         <AddressProvider>
-          <App />
+          <WorkerPersonalInfoProvider>
+            <App />
+          </WorkerPersonalInfoProvider>
         </AddressProvider>
       </ProfileProvider>
+      </KycProvider>
     </AuthProvider>
     </BrowserRouter>
     </GoogleOAuthProvider>

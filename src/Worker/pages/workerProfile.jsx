@@ -4,9 +4,13 @@ import { FiX } from "react-icons/fi";
 import ProfileTabs from "../components/profile/profileMenu";
 import ProfileOverview from "../components/profile/profileOverview";
 
+
+
 const WorkerProfile = () => {
   const [activeSection, setActiveSection] = useState("image");
   const navigate = useNavigate();
+ 
+
 
   const renderSection = () => {
     switch (activeSection) {

@@ -162,7 +162,7 @@ const ProfileInfoCard = () => {
             name="date_of_birth"
             disabled={!isEditing}
             value={formData.date_of_birth}
-            onChange={handleChange}
+            onChange={handleChange} 
             className={getInputClass(formData.date_of_birth)}
           />
 

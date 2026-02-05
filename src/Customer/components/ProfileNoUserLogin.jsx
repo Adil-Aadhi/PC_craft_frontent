@@ -73,7 +73,7 @@ const PleaseLogin = () => {
             transition={{ delay: 0.5 }}
             className="text-slate-600 mb-8 leading-relaxed"
           >
-            Sign in to access your profile
+            Sign in to access services
           </motion.p>
 
           {/* Primary Action */}
@@ -100,16 +100,35 @@ const PleaseLogin = () => {
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate("/register")}
             className="
+              w-full mb-4
+              px-6 py-3
+              rounded-lg
+              text-sm font-medium
+              bg-orange-500 hover:bg-orange-500/80
+              border border-slate-300
+              text-white
+            "
+          >
+            Create Account
+          </motion.button>
+
+
+          {/* Theritery Action */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate("/")}
+            className="
               w-full
               px-6 py-3
               rounded-lg
               text-sm font-medium
-              bg-white hover:bg-slate-50
+              bg-slate-400/30 hover:bg-slate-400/50
               border border-slate-300
               text-slate-700
             "
           >
-            Create Account
+            May be later
           </motion.button>
         </div>
       </motion.div>

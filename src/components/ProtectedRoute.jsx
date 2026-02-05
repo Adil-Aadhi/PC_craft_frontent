@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
+import PleaseLogin from "../Customer/components/ProfileNoUserLogin";
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const accessToken = localStorage.getItem("accessToken");
@@ -6,7 +7,14 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   // ❌ Not logged in
   if (!accessToken || !user) {
-    return <Navigate to="/login" replace />;
+    return <PleaseLogin />;
+  }
+
+  if (
+    user.role === "worker" &&
+    !location.pathname.startsWith("/worker")
+  ) {
+    return <Navigate to="/worker/dashboard" replace />;
   }
 
   // ❌ Role not allowed
