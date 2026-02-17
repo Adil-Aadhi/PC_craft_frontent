@@ -19,6 +19,7 @@ const GoogleAuthButton = ({ role, trigger = false, mode = "login" }) => {
         },
         { withCredentials: true }
       );
+      console.log(tokenResponse)
       
       setAccessToken(res.data.access);
       localStorage.setItem("accessToken", res.data.access);

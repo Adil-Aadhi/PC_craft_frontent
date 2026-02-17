@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import { Zap, Menu, X, ShoppingCart, User,BellDot,MessageCircle,MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import LoginRequiredToast from "./LoginRequiredToast";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = ({ variant = "dark" }) => {
   const { handleLogout } = useAuth();
@@ -14,7 +14,7 @@ const Navbar = ({ variant = "dark" }) => {
   const [authOpen, setAuthOpen] = useState(false);
   const navigate=useNavigate()
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const {user}=useAuth();
 
   const userRef = useRef(null);
   const closeTimeout = useRef(null);
@@ -59,6 +59,20 @@ const Navbar = ({ variant = "dark" }) => {
 
     navigate("/build");
   };
+
+  const HandleMessageClick=()=>{
+      if (!user) {
+      toast(<LoginRequiredToast />, {
+        autoClose: false, // stays until action
+        closeOnClick: false,
+        toastId: "login-required",
+        draggable: false,
+      });
+      return;
+    }
+
+    navigate("/chat");
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -114,7 +128,9 @@ const Navbar = ({ variant = "dark" }) => {
 
               {/* ACTIONS */}
               <div className="flex items-center gap-4">
-                <MessageSquare className={`w-5 h-5 ${textSub} ${textSubHover}`} />
+                <button onClick={HandleMessageClick}>
+                  <MessageSquare className={`w-5 h-5 ${textSub} ${textSubHover}`} />
+                </button>
                 <ShoppingCart className={`w-5 h-5 ${textSub} ${textSubHover}`} />
                 <BellDot className={`w-5 h-5 ${textSub} ${textSubHover}`} />
 

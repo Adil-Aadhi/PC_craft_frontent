@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState,useEffect } from "react";
 import api from "../api/axios";
 import {useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,6 +7,8 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [user,setUser]=useState(null)
   const [error, setError] = useState(null);
   const [accessToken, setAccessToken] = useState(
         () => localStorage.getItem("accessToken")
@@ -24,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       const { access, user } = res.data;
 
       localStorage.setItem("accessToken", access);
-      localStorage.setItem("user", JSON.stringify(user));
+      setUser(user);
       toast(
           <div className="flex flex-col">
             <div className="text-sm font-semibold text-white">
@@ -74,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("accessToken",access)
       setAccessToken(access);
-      localStorage.setItem("user", JSON.stringify(user));
+      setUser(user);
 
       const role=res.data.user.role
 
@@ -114,7 +116,8 @@ export const AuthProvider = ({ children }) => {
 
   // ALWAYS clear frontend auth
   localStorage.removeItem("accessToken");
-  localStorage.removeItem("user");
+  // localStorage.removeItem("user");
+  setUser(null);
 
   toast(
   <div className="flex flex-col">
@@ -128,12 +131,36 @@ export const AuthProvider = ({ children }) => {
 );
 
 
+
   navigate("/login");
 };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!accessToken) {
+        setAuthLoading(false);
+      return;
+    }
+
+      try {
+        const res = await api.get("users/auth/me/");
+        setUser(res.data);
+      } catch {
+        setUser(null);
+        localStorage.removeItem("accessToken");
+        setAccessToken(null);
+      }
+      finally {
+      setAuthLoading(false);   // 🔥 important
+    }
+    };
+
+    fetchUser();
+  }, [accessToken]);
+
 
   return (
-    <AuthContext.Provider value={{accessToken, register, login, loading, error,handleLogout,setAccessToken  }}>
+    <AuthContext.Provider value={{accessToken, register, login, loading, error,handleLogout,setAccessToken,user,authLoading   }}>
       {children}
     </AuthContext.Provider>
   );

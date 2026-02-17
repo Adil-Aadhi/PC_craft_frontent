@@ -1,8 +1,9 @@
 import { useContext } from "react";
-import { KycContext } from "../contexts/KycContext";
+import { KycContext} from "../context/KycContext"
+import { useAuth } from "../../context/AuthContext";
 
 const useKycGuard = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const {user}=useAuth()
   const { openKycModal } = useContext(KycContext);
 
   const checkKyc = (action) => {

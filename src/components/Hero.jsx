@@ -3,25 +3,34 @@ import {Cpu,Wrench,Truck,Shield,Zap,ArrowRight} from "lucide-react";
 import LoginRequiredToast from "./LoginRequiredToast";
 import { toast } from "react-toastify"; 
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Hero = () => {
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const user = JSON.parse(localStorage.getItem("user"));
+  const { user,authLoading  } = useAuth();
+  
+  console.log("render user:", user);
   const navigate=useNavigate()
-  const handleBuildClick = () => {
 
-    if (!user) {
-      toast(<LoginRequiredToast />, {
-        autoClose: false, // stays until action
-        closeOnClick: false,
-        toastId: "login-required",
-        draggable: false,
-      });
-      return;
-    }
 
-    navigate("/build");
-  };
+ const handleBuildClick = () => {
+  console.log("CLICKED USER:", user, "LOADING:", authLoading);
+
+  if (authLoading) return; // wait until auth restore completes
+
+  if (!user) {
+    toast(<LoginRequiredToast />, {
+      autoClose: false,
+      closeOnClick: false,
+      toastId: "login-required",
+      draggable: false,
+    });
+    return;
+  }
+
+  navigate("/build");
+};
 
   return (
     <section className="relative min-h-screen bg-[#05080f] text-white overflow-hidden">

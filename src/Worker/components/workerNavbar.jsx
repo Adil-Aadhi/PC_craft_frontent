@@ -2,10 +2,16 @@ import { FiBell, FiChevronDown, FiLogOut } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { Zap } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import useKycGuard from  "../hooks/useKycGuard"
 
 export default function WorkerNavbar() {
   const navigate = useNavigate();
+  const { checkKyc } = useKycGuard();
   const { handleLogout } = useAuth();
+
+  const HanndleProfileView=()=>{
+      navigate("/worker/profile")
+  }
 
   return (
     <div className="sticky top-4 z-50 w-full flex justify-center">
@@ -38,7 +44,7 @@ export default function WorkerNavbar() {
 
             {/* Avatar + info → navigate */}
             <div
-              onClick={() => navigate("/worker/profile")}
+              onClick={() =>checkKyc(HanndleProfileView) }
               className="flex items-center gap-2 cursor-pointer"
             >
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">

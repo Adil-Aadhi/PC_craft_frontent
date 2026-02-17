@@ -1,7 +1,11 @@
 import { FiAlertCircle, FiArrowRight, FiX, FiShield, FiCheckCircle } from "react-icons/fi";
+import KycPage from "./kyc/KycPage";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const KycModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
+  const navigate=useNavigate()
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -76,7 +80,7 @@ const KycModal = ({ isOpen, onClose }) => {
             <div className="mb-8">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">Verification progress</span>
-                <span className="font-semibold text-blue-600">20%</span>
+                <span className="font-semibold text-blue-600">10%</span>
               </div>
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div 
@@ -108,7 +112,7 @@ const KycModal = ({ isOpen, onClose }) => {
               <button
                 onClick={() => {
                   onClose();
-                  // later: navigate("/worker/kyc");
+                  navigate('/worker/kyc/page')
                 }}
                 className="
                   flex-1 px-6 py-3.5

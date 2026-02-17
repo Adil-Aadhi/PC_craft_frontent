@@ -7,7 +7,7 @@ import ProfileOverview from "../components/profile/profileOverview";
 
 
 const WorkerProfile = () => {
-  const [activeSection, setActiveSection] = useState("image");
+  const [activeSection, setActiveSection] = useState("personal");
   const navigate = useNavigate();
  
 

@@ -12,6 +12,7 @@ import ProfileAvatarCard from "../components/ProfileAvatar";
 import { useAuth } from "../../context/AuthContext";
 import ProfileMenu from "../components/ProfileMenu";
 
+
 /* ---------------- ANIMATION VARIANTS ---------------- */
 
 const cardVariants = {
@@ -30,12 +31,15 @@ const cardVariants = {
 };
 
 const ProfilePage = () => {
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-
+  
   const [activeSection, setActiveSection] = useState("avatar");
-  const {handleLogout}=useAuth()
+  const {handleLogout,user,authLoading}=useAuth()
 
-  if (!storedUser) {
+  if (authLoading) {
+    return <div>Loading...</div>; // or spinner component
+  }
+
+  if (!user) {
     return <PleaseLogin />;
   }
 

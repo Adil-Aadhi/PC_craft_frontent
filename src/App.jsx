@@ -14,6 +14,10 @@ import ProtectedRoute from './components/ProtectedRoute'
 import WorkerProfile from './Worker/pages/workerProfile'
 import WorkerLayout from './Worker/layout/workerLayout'
 import PublicRoute from './components/PublicRoute'
+import KycPage from './Worker/components/kyc/KycPage'
+import WorkerChatPage from './Worker/pages/WorkerChatPage'
+import ChatHomePage from './Chat/pages/ChatHomePage'
+import UserLayout from './Customer/layout/UserLayout'
 
 function App() {
 
@@ -69,8 +73,15 @@ function App() {
 
           {/* 👤 USER ONLY */}
           <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
+
+            <Route element={<UserLayout />}>
+              <Route path="/user/profile" element={<Profile />} />
+            </Route>
+
             <Route path="/build" element={<BuildPC />} />
-            <Route path="/user/profile" element={<Profile />} />
+            
+            <Route path="/chat" element={<ChatHomePage />} />
+            <Route path="/chat/:receiverId" element={<ChatHomePage />} />
           </Route>
 
           {/* 🧑‍🔧 WORKER ONLY */}
@@ -79,6 +90,11 @@ function App() {
             <Route element={<WorkerLayout />}>
               <Route path="/worker/dashboard" element={<WorkerDashboard />} />
               <Route path="/worker/profile" element={<WorkerProfile />} />
+              <Route path="/worker/kyc/page" element={<KycPage />} />
+              <Route path="/worker/chat/:id" element={<WorkerChatPage />} />
+              
+              <Route path="/worker/chat" element={<ChatHomePage />} />
+              <Route path="/worker/chat/:receiverId" element={<ChatHomePage />} />
             </Route>
             
           </Route>

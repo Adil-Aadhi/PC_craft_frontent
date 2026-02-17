@@ -12,6 +12,6 @@ export const updateProfileImage = async (imageUrl, imageId) => {
 };
 
 export const deleteProfileImage = async () => {
-  const res = await api.delete("/users/profile/delete-image/");
+  const res = await api.delete("/users/profile/update-image/");
   return res.data;
 };

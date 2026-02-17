@@ -7,12 +7,14 @@ import {
   deleteAddressApi
 } from "../api/addressApi";
 import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
 
 const UserAddressContext = createContext();
 
 export const AddressProvider = ({ children }) => {
   const [userAddress, setUserAddress] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { user, authLoading } = useAuth();
 
   // 🔄 Load all addresses
  const loadAddresses = async () => {
@@ -82,10 +84,11 @@ export const AddressProvider = ({ children }) => {
 }
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) return;
+    if (authLoading) return;   // wait for auth restore
+    if (!user) return; 
+
     loadAddresses();
-  }, []);
+  }, [user,authLoading]);
 
   return (
     <UserAddressContext.Provider

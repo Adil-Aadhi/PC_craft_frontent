@@ -1,10 +1,14 @@
 import { Navigate, Outlet } from "react-router-dom";
 import PleaseLogin from "../Customer/components/ProfileNoUserLogin";
+import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ allowedRoles }) => {
-  const accessToken = localStorage.getItem("accessToken");
-  const user = JSON.parse(localStorage.getItem("user"));
 
+const {user,authLoading,accessToken}=useAuth()
+
+  if (authLoading) {
+  return <div>Loading...</div>; // or spinner
+}
   // ❌ Not logged in
   if (!accessToken || !user) {
     return <PleaseLogin />;

@@ -6,13 +6,17 @@ export default function WorkerLayout() {
   const location = useLocation();
 
   // adjust path according to your route
-  const hideSidebar = location.pathname.includes("/profile");
+  const hideSidebar = location.pathname.includes("/profile") ||
+                      location.pathname.includes("/kyc/page")
+
+  const hideNavbar =
+    location.pathname.includes("/kyc/page");
 
   return (
     <div className="min-h-screen bg-gray-100">
 
       {/* Sticky Navbar */}
-      <WorkerNavbar />
+      {!hideNavbar && <WorkerNavbar />}
 
       {/* Content Area */}
       <div className="flex gap-4 px-4 pb-4 pt-2">
