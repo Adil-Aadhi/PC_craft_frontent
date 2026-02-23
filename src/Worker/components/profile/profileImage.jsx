@@ -234,15 +234,28 @@ const ProfileImage = () => {
             
             {/* Image Container */}
             <div className="relative w-32 h-32 ring-4 ring-white rounded-full shadow-2xl bg-white">
-              <img
-                src={image || "/default-avatar.png"}
-                alt="Profile"
-                onClick={() => image && setPreviewImage(image)}
-                onError={(e) => (e.target.src = "/default-avatar.png")}
-                className={`w-full h-full rounded-full object-cover transition-all duration-300 ${
-                  loading ? "opacity-60 scale-95" : "group-hover/profile:scale-105"
-                }`}
-              />
+              <div
+                  onClick={() => image && setPreviewImage(image)}
+                  className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-gray-200 text-gray-600 font-semibold text-lg cursor-pointer"
+                >
+                  {image ? (
+                    <img
+                      src={image}
+                      alt="Profile"
+                      onError={(e) => (e.target.style.display = "none")}
+                      className={`w-full h-full object-cover transition-all duration-300 ${
+                        loading ? "opacity-60 scale-95" : "group-hover/profile:scale-105"
+                      }`}
+                    />
+                  ) : (
+                      <div className="w-full h-full rounded-full overflow-hidden 
+                                      bg-gradient-to-r from-blue-500 to-purple-600 
+                                      flex items-center justify-center 
+                                    text-white text-2xl font-semibold">
+                    {user?.username?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                    )}
+                </div>
               
               {/* Loading Overlay */}
               {loading && (

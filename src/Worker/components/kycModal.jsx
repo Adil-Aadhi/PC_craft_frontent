@@ -1,11 +1,29 @@
 import { FiAlertCircle, FiArrowRight, FiX, FiShield, FiCheckCircle } from "react-icons/fi";
-import KycPage from "./kyc/KycPage";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../api/axios";
+import KycLinearProgress from "./kyc/KycMinimalBar";
 
 const KycModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const navigate=useNavigate()
+  const [progress, setProgress] = useState(10);
+  const [loading,setLoading]=useState(true)
+
+  const fetchProgress = async () => {
+      try {
+        const res = await api.get("/workers/kyc/progress/");
+        setProgress(res.data.progress ?? 10);
+      } catch (err) {
+        console.error("Failed to load KYC progress", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+ 
+  useEffect(()=>{
+    fetchProgress()
+  },[])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -77,18 +95,7 @@ const KycModal = ({ isOpen, onClose }) => {
             </div>
 
             {/* Progress indicator */}
-            <div className="mb-8">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Verification progress</span>
-                <span className="font-semibold text-blue-600">10%</span>
-              </div>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-500"
-                  style={{ width: '20%' }}
-                />
-              </div>
-            </div>
+            <KycLinearProgress  progress={progress} />
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3">

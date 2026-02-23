@@ -1,8 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const ChatList = ({ users }) => {
   const navigate = useNavigate();
   const { receiverId } = useParams();
+  const {user}=useAuth()
+
+  const redirectPath =user?.role === "worker" ? "/worker/chat" : "/chat";
+
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -44,7 +49,7 @@ const ChatList = ({ users }) => {
               <div
                 key={u.id}
                 onClick={() =>
-                  navigate(`/chat/${u.other_user.id}`,{
+                  navigate(`${redirectPath}/${u.other_user.id}`,{
                     state: { roomName: u.room_name }
                   })
                 }

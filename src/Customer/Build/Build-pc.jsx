@@ -1,35 +1,46 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import LeftPanel from "./LeftPanel";
 import CenterPreview from "./CenterPreview";
 import RightCart from "./RightPanel";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch,useSelector } from "react-redux";
+import { fetchComponents } from "./redux/components/componentSlice";
+import { addComponent } from "./redux/components/selectedBuildSlice";
+import { removeComponent } from "./redux/components/selectedBuildSlice";
+import { useMemo,useCallback  } from "react";
+import PCBuilderLoader from "./PCBuilderLoader";
+import ComponentModal from "./components/details modal/ComponentModal";
 
+const BuildPC = () => { 
 
-const componentData = {
-  cpu: [
-    { id: 1, name: "Ryzen 5 5600X", price: 15000 },
-    { id: 2, name: "Intel i5 12400F", price: 17000 },
-  ],
-  ram: [
-    { id: 3, name: "16GB DDR4 3200MHz", price: 6000 },
-    { id: 4, name: "32GB DDR4 3600MHz", price: 11000 },
-  ],
-};
-
-
-
-const BuildPC = () => {
-    const navigate=useNavigate()
+  const navigate=useNavigate()
   const [activeCategory, setActiveCategory] = useState("cpu");
-  const [build, setBuild] = useState({});
+  const dispatch = useDispatch();
+  const build = useSelector((state) => state.build.selected);
+  const {cpu,motherboard,ram,gpu,psu,storage,case: pcCase,casefan,cooler,loading,error,} = useSelector((state) => state.components);
+  const isInitialLoading =loading && cpu.length === 0 && motherboard.length === 0 && ram.length === 0 && gpu.length === 0 && psu.length === 0 && storage.length === 0 && pcCase.length === 0 && casefan.length === 0 && cooler.length === 0;
 
-  const handleSelect = (category, item) => {
-    setBuild((prev) => ({
-      ...prev,
-      [category]: item,
-    }));
-  };
+  useEffect(() => {
+      const map = {cpu,motherboard,ram,gpu,psu,storage,case: pcCase,casefan,cooler,};
+      if (map[activeCategory]?.length === 0) {
+        dispatch(fetchComponents(activeCategory));
+      }
+    }, [activeCategory, dispatch]);
+
+  const componentData = useMemo(() => ({cpu,motherboard,ram,gpu,psu,storage,case: pcCase,casefan,cooler,}), [cpu, motherboard, ram, gpu, psu, storage, pcCase, casefan, cooler]);
+
+  const handleSelect = useCallback((category, item) => {
+      dispatch(addComponent({ category, item }));
+    }, [dispatch]);
+
+
+  const handleRemove = useCallback((category) => {
+        dispatch(removeComponent(category));
+      }, [dispatch]);
+
+  if (isInitialLoading) return <PCBuilderLoader/>
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black px-6 py-8 text-white">
@@ -57,6 +68,7 @@ const BuildPC = () => {
             componentData={componentData}
             build={build}
             onSelect={handleSelect}
+            loading={loading}
           />
         </div>
 
@@ -67,9 +79,11 @@ const BuildPC = () => {
 
         {/* RIGHT */}
         <div className="col-span-3 bg-gray-900/70 rounded-2xl border border-cyan-500/10">
-          <RightCart build={build} />
+          <RightCart build={build} onRemove={handleRemove} />
         </div>
       </div>
+
+      <ComponentModal componentData={componentData} />
     </div>
   );
 };

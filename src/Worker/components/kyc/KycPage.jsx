@@ -7,6 +7,9 @@ import WorkerDetails from "./Steps/WorkerMainDetails";
 import IdentityVerification from "./Steps/WorkerIdentity";
 import api from "../../../api/axios";
 import UpiDetails from "./Steps/WorkerUpiPayout";
+import KycSuccessAnimation from "./KycSuccessAnimation";
+import { useAuth } from "../../../context/AuthContext";
+
 
 const STEP_PROGRESS = {
   0: 10,
@@ -20,7 +23,21 @@ const KycPage = () => {
   const [step, setStep] = useState(null);       // 👈 wait for backend
   const [progress, setProgress] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [kycSuccess, setKycSuccess] = useState(false);
   const navigate = useNavigate();
+  const {fetchUser}=useAuth()
+
+  //updating kyc status
+
+  const UpdateKycStatus=async()=>{
+    try{
+      await api.post('workers/kyc/submit/')
+      await fetchUser()
+    }
+    catch(err){
+      console.log("error",err)
+    }
+  }
   
 
   // 🔹 Restore progress & step
@@ -69,9 +86,13 @@ const KycPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="relative w-full max-w-3xl bg-white p-6 rounded-lg shadow-lg">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center px-4 py-8">
 
+      {/* 🔹 Progress Bar OUTSIDE the form */}
+      <div className="w-full max-w-3xl mb-6">
+        {step !== null && (
+          <KycProgressBar step={step} progress={progress} />
+        )}
         {/* Close */}
         <button
           onClick={() => navigate("/worker/dashboard")}
@@ -79,9 +100,13 @@ const KycPage = () => {
         >
           <FiX size={22} />
         </button>
+      </div>
 
-        {/* Progress */}
-        <KycProgressBar progress={progress} />
+      {/* 🔹 Form Card */}
+      <div className="relative w-full max-w-3xl bg-white p-6 rounded-lg shadow-lg">
+
+        
+        
 
         {/* Step 1 */}
         {step === 0 && <BasicDetails onComplete={completeStep} />}
@@ -90,13 +115,31 @@ const KycPage = () => {
         {step === 1 && <WorkerDetails onComplete={completeStep} />}
 
         {/* Step 3 */}
-        {step === 2 && <IdentityVerification onComplete={completeStep}/>}
-        
-        {/* Step 4 */}
-        {step === 3 && <UpiDetails onComplete={completeStep}/>}
+        {step === 2 && (
+          <IdentityVerification onComplete={completeStep} />
+        )}
 
+        {/* Step 4 */}
+        {step === 3 && (
+          <UpiDetails
+            onComplete={completeStep}
+            setKycSuccess={setKycSuccess}
+            UpdateKycStatus={UpdateKycStatus}
+          />
+        )}
       </div>
+
+      {/* 🔹 Success Animation */}
+      {kycSuccess && (
+        <KycSuccessAnimation
+          onClose={async () => {
+            setKycSuccess(false);
+            navigate("/worker/dashboard");
+          }}
+        />
+      )}
     </div>
+
   );
 };
 

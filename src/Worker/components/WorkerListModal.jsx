@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { X } from "lucide-react";
+import { toast } from "react-toastify";
 
 const WorkerListModal = ({ isOpen, onClose }) => {
   const [workers, setWorkers] = useState([]);
@@ -33,12 +34,30 @@ const WorkerListModal = ({ isOpen, onClose }) => {
         receiver_id: workerId,
       });
 
-      alert("Chat request sent ✅");
+      toast(
+          <div className="flex flex-col">
+            <div className="text-sm font-semibold text-white">
+              Chat Request
+            </div>
+            <div className="text-sm text-green-300 mt-0.5">
+              Sented successfully
+            </div>
+          </div>
+        );
 
       onClose(); // close modal after sending
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.detail || "Failed to send request");
+      toast(
+          <div className="flex flex-col">
+            <div className="text-sm font-semibold text-red-400">
+              Chat request Failed
+            </div>
+            <div className="text-sm text-white mt-0.5">
+              Please Try Again Later
+            </div>
+          </div>
+        );
     } finally {
       setSendingId(null);
     }

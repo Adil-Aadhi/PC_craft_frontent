@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FiX } from "react-icons/fi";
 import ProfileTabs from "../components/profile/profileMenu";
 import ProfileOverview from "../components/profile/profileOverview";
+import WorkerProfessionalDetails from "../components/profile/profileWorkerProfessionalInfo";
+import WorkerUpiCard from "../components/profile/profileUpiComponent";
 
 
 
@@ -16,6 +18,10 @@ const WorkerProfile = () => {
     switch (activeSection) {
       case "personal":
         return <ProfileOverview />;
+      case "work":
+        return <WorkerProfessionalDetails/>
+      case "payment":
+        return <WorkerUpiCard/>
       default:
         return null;
     }

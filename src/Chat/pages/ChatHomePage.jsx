@@ -6,6 +6,7 @@ import ChatLayout from "../components/ChatLayout";
 import WorkerListModal from "../../Worker/components/WorkerListModal";
 import api from "../../api/axios";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 /* =========================
    ANIMATION VARIANTS
@@ -38,7 +39,7 @@ const ChatHomePage = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
-  
+  const {user}=useAuth()
 
   const [users, setUsers] = useState([]);
   const [loadingChats, setLoadingChats] = useState(true);
@@ -68,6 +69,13 @@ const userMap = useMemo(() => {
   return map;
 }, [users]);
 
+  const closeChat = () => {
+  const redirectPath =
+    user?.role === "worker" ? "/worker/dashboard" : "/";
+
+  navigate(redirectPath);
+};
+
   
 
 
@@ -94,6 +102,12 @@ const userMap = useMemo(() => {
   if (!loadingChats && !hasChats) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+         <button
+              onClick={() => navigate(-1)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-gray-200 transition"
+            >
+              ✕
+            </button>
         <motion.div
           variants={panelVariants}
           initial="hidden"
@@ -129,16 +143,21 @@ const userMap = useMemo(() => {
               </p>
             </div>
 
-            <button
-              onClick={() => setShowWorkerModal(true)}
-              className="px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
-            >
-              Start New Conversation
-            </button>
-            <WorkerListModal
-              isOpen={showWorkerModal}
-              onClose={() => setShowWorkerModal(false)}
-            />
+            {user?.role === "user" && (
+                  <>
+                    <button
+                      onClick={() => setShowWorkerModal(true)}
+                      className="px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+                    >
+                      Start New Conversation
+                    </button>
+
+                    <WorkerListModal
+                      isOpen={showWorkerModal}
+                      onClose={() => setShowWorkerModal(false)}
+                    />
+                  </>
+                )}
           </div>
         </motion.div>
       </div>
@@ -156,13 +175,22 @@ const userMap = useMemo(() => {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-white">Messages</h1>
 
-            <button
-              onClick={() => navigate("/users")}
-              className="p-2.5 bg-white/20 rounded-xl hover:bg-white/30 transition"
-              title="Start new chat"
-            >
-              +
-            </button>
+           {user?.role === "user" && (
+                <>
+                  <button
+                    onClick={() => setShowWorkerModal(true)}
+                    className="p-2.5 bg-white/20 rounded-xl hover:bg-white/30 transition"
+                    title="Start new chat"
+                  >
+                    +
+                  </button>
+
+                  <WorkerListModal
+                    isOpen={showWorkerModal}
+                    onClose={() => setShowWorkerModal(false)}
+                  />
+                </>
+              )}
           </div>
         </div>
 
@@ -232,7 +260,7 @@ const userMap = useMemo(() => {
               {/* Close Button */}
               <button
                 className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 transition"
-                onClick={() => navigate("/")}
+                onClick={()=>closeChat()}
               >
                 ✕
               </button>

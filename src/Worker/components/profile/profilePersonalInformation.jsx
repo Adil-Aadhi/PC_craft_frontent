@@ -1,8 +1,10 @@
 import { FiEdit2 } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { useWorkerPersonalInfo } from "../../context/workerProfileInfoContext";
+import { useAuth } from "../../../context/AuthContext";
 
 const WorkerPersonalInfo = () => {
+  const {user}=useAuth()
   const {
     personalInfo,
     fetchPersonalInfo,
@@ -87,7 +89,7 @@ const WorkerPersonalInfo = () => {
           Personal Information
         </h2>
 
-        {!isEditing && (
+        {!isEditing && user.kyc_status !== "pending" &&(
           <button
             onClick={() => setIsEditing(true)}
             className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"

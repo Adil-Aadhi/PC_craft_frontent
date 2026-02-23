@@ -135,8 +135,7 @@ export const AuthProvider = ({ children }) => {
   navigate("/login");
 };
 
-  useEffect(() => {
-    const fetchUser = async () => {
+ const fetchUser = async () => {
       if (!accessToken) {
         setAuthLoading(false);
       return;
@@ -155,12 +154,13 @@ export const AuthProvider = ({ children }) => {
     }
     };
 
+  useEffect(() => {
     fetchUser();
   }, [accessToken]);
 
 
   return (
-    <AuthContext.Provider value={{accessToken, register, login, loading, error,handleLogout,setAccessToken,user,authLoading   }}>
+    <AuthContext.Provider value={{accessToken, register, login, loading, error,handleLogout,setAccessToken,user,authLoading,fetchUser  }}>
       {children}
     </AuthContext.Provider>
   );

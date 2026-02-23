@@ -1,32 +1,30 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ShoppingCart,
-  Trash2,
-  Plus,
-  Minus,
-  Package,
-  ShieldCheck,
-  Truck,
-  Clock,
-  ChevronRight,
-  Sparkles,
-  Zap,
-  AlertCircle,
-  CheckCircle2,
-  CreditCard,
-  Gift
-} from "lucide-react";
+import {ShoppingCart,Trash2,Package,ShieldCheck,Truck,Clock,ChevronRight,Sparkles,AlertCircle,CheckCircle2,CreditCard,} from "lucide-react";
+import { useCompatibility } from "./hooks/useCompatibility";
+import React from "react";
 
-const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
-  const totalPrice = Object.values(build).reduce(
-    (sum, item) => sum + (item.price * (item.quantity || 1)),
-    0
-  );
 
-  const [showPromo, setShowPromo] = useState(false);
-  const [promoCode, setPromoCode] = useState("");
+const RightCart = ({ build, onRemove }) => {
+ const totalPrice = Object.values(build).reduce((sum, item) => {
+  if (!item) return sum; // skip null
+  return sum + item.price * (item.quantity || 1);
+}, 0);
+
+const { checkCompatibility } = useCompatibility();
+
+
   const [estimatedDelivery, setEstimatedDelivery] = useState("3-5 days");
+
+  const selectedCount = Object.values(build).filter(Boolean).length;
+
+  const incompatibleItems = Object.entries(build).filter(([category, item]) => {
+  if (!item) return false;
+  const { compatibility } = checkCompatibility(category, item);
+  return compatibility === "bad";
+});
+
+const hasIssues = incompatibleItems.length > 0;
 
   const calculateSavings = () => {
     // Mock savings calculation
@@ -34,6 +32,7 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
   };
 
   const savings = calculateSavings();
+  const TOTAL_COMPONENTS = 9;
 
   const components = [
     { key: "cpu", label: "Processor", color: "cyan" },
@@ -42,6 +41,8 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
     { key: "storage", label: "Storage", color: "pink" },
     { key: "psu", label: "Power Supply", color: "yellow" },
     { key: "case", label: "Case", color: "gray" },
+    { key: "casefan", label: "Case Fan", color: "sky" },
+    { key: "cooler", label: "Cooler", color: "blue" },
   ];
 
   return (
@@ -56,7 +57,7 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
           <div>
             <h3 className="text-xl font-bold text-white">Your Build</h3>
             <p className="text-sm text-cyan-300/70">
-              {Object.keys(build).length} of 6 components selected
+              {selectedCount} of {TOTAL_COMPONENTS} components selected
             </p>
           </div>
         </div>
@@ -65,7 +66,7 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
         <div className="relative">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 flex items-center justify-center border border-cyan-500/30">
             <span className="text-white font-bold">
-              {Object.keys(build).length}
+              {selectedCount}
             </span>
           </div>
           <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-1">
@@ -78,13 +79,13 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
       <div className="mb-6">
         <div className="flex justify-between text-xs text-gray-400 mb-2">
           <span>Build Progress</span>
-          <span>{Math.round((Object.keys(build).length / 6) * 100)}%</span>
+          <span>{Math.round((selectedCount / TOTAL_COMPONENTS) * 100)}%</span>
         </div>
         <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
           <motion.div 
             className="h-full bg-gradient-to-r from-cyan-500 to-emerald-500"
             initial={{ width: 0 }}
-            animate={{ width: `${(Object.keys(build).length / 6) * 100}%` }}
+            animate={{ width: `${(selectedCount / TOTAL_COMPONENTS) * 100}%` }}
             transition={{ duration: 1 }}
           />
         </div>
@@ -93,7 +94,7 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
       {/* Component List */}
       <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2">
         <AnimatePresence>
-          {Object.keys(build).length === 0 ? (
+          {selectedCount === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -106,8 +107,12 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
               </p>
             </motion.div>
           ) : (
-            Object.entries(build).map(([key, item]) => {
+            Object.entries(build)
+                .filter(([_, item]) => item) // 🚀 skip null components
+                .map(([key, item]) => {
               const component = components.find(c => c.key === key);
+              const { compatibility } = checkCompatibility(key, item);
+              const isBad = compatibility === "bad";
               
               return (
                 <motion.div
@@ -116,8 +121,12 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  className="group bg-gradient-to-r from-gray-800/40 to-gray-900/20 backdrop-blur-sm rounded-xl p-4 border border-cyan-500/10 hover:border-cyan-500/30 transition-all"
-                >
+                  className={`group bg-gradient-to-r from-gray-800/40 to-gray-900/20 backdrop-blur-sm rounded-xl p-4 border transition-all ${
+                  isBad
+                    ? "border-red-500/40"
+                    : "border-cyan-500/10 hover:border-cyan-500/30"
+                }`}
+                  >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -127,9 +136,17 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-white">
-                            {component?.label}
-                          </div>
+                          <div className="flex items-center gap-2">
+                              <div className="text-sm font-medium text-white">
+                                {component?.label}
+                              </div>
+
+                              {isBad && (
+                                <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/20 border border-red-500/40 text-red-400 font-semibold">
+                                  Incompatible
+                                </span>
+                              )}
+                            </div>
                           <div className="text-xs text-gray-400 mt-1 truncate max-w-[180px]">
                             {item.name}
                           </div>
@@ -137,25 +154,6 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => onUpdateQuantity(key, Math.max(1, (item.quantity || 1) - 1))}
-                            className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="text-sm text-white w-6 text-center">
-                            {item.quantity || 1}
-                          </span>
-                          <button
-                            onClick={() => onUpdateQuantity(key, (item.quantity || 1) + 1)}
-                            className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-                        
                         <div className="text-right">
                           <div className="text-sm font-bold text-white">
                             ₹{(item.price * (item.quantity || 1)).toLocaleString()}
@@ -184,45 +182,35 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
         </AnimatePresence>
       </div>
 
-      {/* Promo Code Section */}
-      <div className="mb-6">
-        <button
-          onClick={() => setShowPromo(!showPromo)}
-          className="w-full flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20 hover:border-cyan-500/30 transition"
-        >
-          <div className="flex items-center gap-2">
-            <Gift className="h-4 w-4 text-cyan-400" />
-            <span className="text-sm text-white">Add promo code</span>
-          </div>
-          <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform ${
-            showPromo ? "rotate-90" : ""
-          }`} />
-        </button>
-        
-        <AnimatePresence>
-          {showPromo && (
+      {hasIssues && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 rounded-xl bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/30"
             >
-              <div className="mt-3 flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter promo code"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  className="flex-1 bg-gray-800/50 border border-cyan-500/30 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/60"
-                />
-                <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-lg text-sm font-semibold text-white hover:opacity-90 transition">
-                  Apply
-                </button>
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+                <span className="text-sm font-semibold text-red-300">
+                  Compatibility Issues Detected
+                </span>
               </div>
+
+              <ul className="space-y-1 text-xs text-red-300/90">
+                {incompatibleItems.map(([category, item]) => {
+                  const { message } = checkCompatibility(category, item);
+
+                  return (
+                    <li key={category} className="flex items-start gap-2">
+                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-400" />
+                      <span>
+                        <strong className="capitalize">{category}</strong>: {message}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
             </motion.div>
           )}
-        </AnimatePresence>
-      </div>
 
       {/* Price Summary */}
       <div className="space-y-3 mb-6">
@@ -280,9 +268,9 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          disabled={Object.keys(build).length === 0}
+          disabled={selectedCount  === 0 || hasIssues || selectedCount < TOTAL_COMPONENTS}
           className={`w-full py-3 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-            Object.keys(build).length === 0
+            selectedCount === 0
               ? "bg-gray-800 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/40"
           }`}
@@ -298,7 +286,7 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
       </div>
 
       {/* Compatibility Warning */}
-      {Object.keys(build).length > 0 && Object.keys(build).length < 6 && (
+      {selectedCount > 0 && selectedCount < TOTAL_COMPONENTS && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -311,12 +299,12 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
             </span>
           </div>
           <p className="text-xs text-yellow-300/80">
-            Add {6 - Object.keys(build).length} more components for expert assembly
+            Add {TOTAL_COMPONENTS - selectedCount} more components for expert assembly
           </p>
         </motion.div>
       )}
 
-      {Object.keys(build).length === 6 && (
+      {selectedCount === TOTAL_COMPONENTS && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -337,4 +325,4 @@ const RightCart = ({ build, onRemove, onUpdateQuantity }) => {
   );
 };
 
-export default RightCart;
+export default React.memo(RightCart);

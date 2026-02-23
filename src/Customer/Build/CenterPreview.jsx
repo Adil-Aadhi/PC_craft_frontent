@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Cpu,
-  Gpu,
+  Monitor,
   HardDrive,
   MemoryStick,
   Power,
@@ -16,8 +16,11 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  Cctv
+  Cctv,
+  CircuitBoard,
 } from "lucide-react";
+import { useCompatibility } from "./hooks/useCompatibility";
+import React from "react";
 
 const CenterPreview = ({ build = {} }) => {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
@@ -25,23 +28,26 @@ const CenterPreview = ({ build = {} }) => {
   const [showLabels, setShowLabels] = useState(true);
   const [activePart, setActivePart] = useState(null);
   const [showStats, setShowStats] = useState(true);
-  const [viewMode, setViewMode] = useState("default");
+  const { checkCompatibility } = useCompatibility();
 
-  /** component positions */
   const componentPositions = {
-    cpu: { x: 45, y: 40, label: "CPU", icon: <Cpu size={20} /> },
-    gpu: { x: 45, y: 70, label: "GPU", icon: <Gpu size={20} /> },
-    ram: { x: 30, y: 45, label: "RAM", icon: <MemoryStick size={20} /> },
+    case: { x: 50, y: 50, label: "Case", icon: <Box size={20} /> },
+    motherboard: { x: 50, y: 50, label: "Motherboard", icon: <CircuitBoard size={20} /> },
+    cpu: { x: 50, y: 45, label: "CPU", icon: <Cpu size={20} /> },
+    cooler: { x: 50, y: 30, label: "Cooler", icon: <Thermometer size={20} /> },
+    ram: { x: 65, y: 42, label: "RAM", icon: <MemoryStick size={20} /> },
+    gpu: { x: 50, y: 65, label: "GPU", icon: <Monitor size={20} /> },
     storage: { x: 25, y: 75, label: "Storage", icon: <HardDrive size={20} /> },
-    psu: { x: 70, y: 85, label: "PSU", icon: <Power size={20} /> },
-    cooling: { x: 60, y: 25, label: "Cooling", icon: <Wind size={20} /> },
+    psu: { x: 75, y: 85, label: "PSU", icon: <Power size={20} /> },
+    casefan: { x: 80, y: 20, label: "Case Fan", icon: <Wind size={20} /> },
   };
 
-  /** completed components count */
   const completedCount = useMemo(
     () => Object.values(build || {}).filter(Boolean).length,
     [build]
   );
+
+  const TOTAL_COMPONENTS = Object.keys(componentPositions).length;
 
   const handleMouseMove = (e) => {
     if (e.buttons !== 1) return;
@@ -60,14 +66,12 @@ const CenterPreview = ({ build = {} }) => {
     setZoom(1);
   };
 
-  /** highlight timeout */
   useEffect(() => {
     if (!activePart) return;
     const t = setTimeout(() => setActivePart(null), 2000);
     return () => clearTimeout(t);
   }, [activePart]);
 
-  /** auto rotate */
   useEffect(() => {
     const i = setInterval(() => {
       if (!activePart) {
@@ -96,10 +100,10 @@ const CenterPreview = ({ build = {} }) => {
           <button onClick={resetView} className="p-2 bg-gray-800 rounded-lg">
             <RotateCw size={18} />
           </button>
-          <button onClick={() => setZoom(z => Math.max(0.5, z - 0.1))} className="p-2 bg-gray-800 rounded-lg">
+          <button onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))} className="p-2 bg-gray-800 rounded-lg">
             <Minus size={18} />
           </button>
-          <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} className="p-2 bg-gray-800 rounded-lg">
+          <button onClick={() => setZoom((z) => Math.min(2, z + 0.1))} className="p-2 bg-gray-800 rounded-lg">
             <Plus size={18} />
           </button>
         </div>
@@ -119,25 +123,68 @@ const CenterPreview = ({ build = {} }) => {
           >
             <div className="relative w-80 h-60 rounded-2xl bg-gray-800 border border-cyan-500/30">
               {Object.entries(componentPositions).map(([key, pos]) => {
-                const hasComponent = build?.[key];
+                const item = build?.[key];
+                const hasComponent = !!item;
+
+                let isBad = false;
+                if (item) {
+                  const { compatibility } = checkCompatibility(key, item);
+                  isBad = compatibility === "bad";
+                }
+
+                /* size hierarchy */
+                let sizeClass = "w-14 h-14";
+                if (key === "motherboard") sizeClass = "w-64 h-44";
+                if (key === "case") sizeClass = "w-72 h-52 opacity-30";
+                if (key === "gpu") sizeClass = "w-24 h-10";
+                if (key === "ram") sizeClass = "w-10 h-16";
+                if (key === "psu") sizeClass = "w-16 h-10";
+                if (key === "storage") sizeClass = "w-12 h-8";
+                if (key === "casefan") sizeClass = "w-10 h-10";
+
+                /* z-index layering */
+                let baseZ = "z-20";
+                if (key === "motherboard") baseZ = "z-10";
+                if (key === "case") baseZ = "z-0";
+
+                const hoverZ = activePart === key ? "z-50" : baseZ;
 
                 return (
                   <motion.div
                     key={key}
                     onClick={() => setActivePart(key)}
-                    className={`absolute w-14 h-14 flex items-center justify-center rounded-lg ${
-                      hasComponent ? "bg-cyan-500/20 border border-cyan-400" : "bg-gray-700"
-                    }`}
+                    className={`group absolute ${sizeClass} flex items-center justify-center rounded-lg border transition-all origin-center will-change-transform
+                      ${
+                        isBad
+                          ? "bg-red-500/20 border-red-500 animate-pulse"
+                          : hasComponent
+                          ? "bg-cyan-500/20 border-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.6)]"
+                          : "bg-gray-700 border-gray-600"
+                      }
+                      ${activePart === key ? " ring-2 ring-cyan-400" : ""}
+                      ${hoverZ}
+                    `}
                     style={{
                       left: `${pos.x}%`,
                       top: `${pos.y}%`,
                       transform: "translate(-50%, -50%)",
                     }}
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={
+                      key === "motherboard" || key === "case" || isBad
+                        ? {}
+                        : { scale: 1.08 }
+                    }
                   >
-                    {pos.icon}
+                    {/* hide icon for background layers */}
+                    {key !== "motherboard" && key !== "case" && pos.icon}
+
+                    {/* label */}
                     {showLabels && hasComponent && (
-                      <div className="absolute -bottom-6 text-xs text-white bg-black/70 px-2 py-1 rounded">
+                      <div
+                        className={`pointer-events-none absolute -bottom-6 text-xs px-2 py-1 rounded ${
+                          isBad ? "bg-red-600/80 text-white" : "bg-black/70 text-white"
+                        }`}
+                      >
                         {build[key]?.name || pos.label}
                       </div>
                     )}
@@ -166,7 +213,9 @@ const CenterPreview = ({ build = {} }) => {
 
           <div className="p-3 rounded-lg bg-cyan-500/10">
             <Sparkles className="text-cyan-400 mb-1" />
-            <div className="text-white font-bold">{completedCount}/6</div>
+            <div className="text-white font-bold">
+              {completedCount}/{TOTAL_COMPONENTS}
+            </div>
             <div className="text-xs text-cyan-300">Completed</div>
           </div>
         </div>
@@ -175,4 +224,4 @@ const CenterPreview = ({ build = {} }) => {
   );
 };
 
-export default CenterPreview;
+export default React.memo(CenterPreview);

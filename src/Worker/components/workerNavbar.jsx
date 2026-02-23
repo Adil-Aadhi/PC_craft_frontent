@@ -1,17 +1,40 @@
-import { FiBell, FiChevronDown, FiLogOut } from "react-icons/fi";
+import { FiBell, FiChevronDown, FiLogOut,FiMessageSquare } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { Zap } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import useKycGuard from  "../hooks/useKycGuard"
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 
 export default function WorkerNavbar() {
   const navigate = useNavigate();
   const { checkKyc } = useKycGuard();
-  const { handleLogout } = useAuth();
+  const { handleLogout,user } = useAuth();
+  const[image,setImage]=useState(null)
+
 
   const HanndleProfileView=()=>{
       navigate("/worker/profile")
   }
+  const HanndleMessageView=()=>{
+      navigate('/worker/chat')
+  }
+  const HanndleNotificationView=()=>{
+      navigate("/worker/notifications")
+  }
+
+   const fetchImage = async () => {
+      try {
+        const res = await api.get("workers/profile-image/");
+        setImage(res.data.profile_image);
+      } catch (err) {
+        console.error("Image fetch failed", err);
+      }
+    };
+
+  useEffect(()=>{
+    fetchImage()
+  },[])
 
   return (
     <div className="sticky top-4 z-50 w-full flex justify-center">
@@ -32,8 +55,20 @@ export default function WorkerNavbar() {
         <div className="flex items-center gap-4">
 
           {/* Notification */}
-          <button className="relative p-2 rounded-lg hover:bg-white/40 transition">
-            <FiBell className="text-lg text-gray-700" />
+          <button
+              onClick={(HanndleNotificationView)}
+              className="relative p-1 rounded-lg hover:bg-white/40 transition"
+            >
+              <FiBell className="text-xl text-gray-700" />
+
+              {/* unread badge (dynamic later) */}
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+
+          <button className="relative p-1 rounded-lg hover:bg-white/40 transition" onClick={()=>checkKyc(HanndleMessageView)}>
+            <FiMessageSquare className="text-xl text-gray-700" />
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
               3
             </span>
@@ -47,12 +82,25 @@ export default function WorkerNavbar() {
               onClick={() =>checkKyc(HanndleProfileView) }
               className="flex items-center gap-2 cursor-pointer"
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                JD
+              <div className="w-8 h-8 rounded-full overflow-hidden 
+                bg-gradient-to-r from-blue-500 to-purple-600 
+                flex items-center justify-center 
+                text-white text-xs font-semibold">
+
+                {image ? (
+                  <img
+                    src={image}
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  user?.username?.charAt(0).toUpperCase()
+                )}
+
               </div>
 
               <div className="hidden sm:block text-left leading-tight">
-                <p className="text-xs font-semibold text-gray-800">John Doe</p>
+                <p className="text-xs font-semibold text-gray-800">{user?.username}</p>
                 <p className="text-[10px] text-gray-500">PC Builder</p>
               </div>
             </div>

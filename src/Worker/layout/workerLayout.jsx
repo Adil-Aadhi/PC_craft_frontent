@@ -7,10 +7,13 @@ export default function WorkerLayout() {
 
   // adjust path according to your route
   const hideSidebar = location.pathname.includes("/profile") ||
-                      location.pathname.includes("/kyc/page")
+                      location.pathname.includes("/kyc/page") ||
+                      location.pathname.includes("/worker/notifications") ||
+                      location.pathname.includes("/worker/chat")
 
   const hideNavbar =
-    location.pathname.includes("/kyc/page");
+    location.pathname.includes("/kyc/page")||
+    location.pathname.includes("/worker/chat")
 
   return (
     <div className="min-h-screen bg-gray-100">

@@ -15,9 +15,10 @@ import WorkerProfile from './Worker/pages/workerProfile'
 import WorkerLayout from './Worker/layout/workerLayout'
 import PublicRoute from './components/PublicRoute'
 import KycPage from './Worker/components/kyc/KycPage'
-import WorkerChatPage from './Worker/pages/WorkerChatPage'
 import ChatHomePage from './Chat/pages/ChatHomePage'
 import UserLayout from './Customer/layout/UserLayout'
+import KycProtectedRoute from './Worker/layout/KYCProtectedRouter'
+import WorkerNotifications from './Notifications/pages/NotificationPage'
 
 function App() {
 
@@ -89,12 +90,17 @@ function App() {
 
             <Route element={<WorkerLayout />}>
               <Route path="/worker/dashboard" element={<WorkerDashboard />} />
-              <Route path="/worker/profile" element={<WorkerProfile />} />
-              <Route path="/worker/kyc/page" element={<KycPage />} />
-              <Route path="/worker/chat/:id" element={<WorkerChatPage />} />
-              
-              <Route path="/worker/chat" element={<ChatHomePage />} />
-              <Route path="/worker/chat/:receiverId" element={<ChatHomePage />} />
+              <Route path="/worker/profile" element={<KycProtectedRoute >
+                                                      <WorkerProfile/>
+                                                  </KycProtectedRoute>} />
+              <Route path="/worker/notifications" element={<WorkerNotifications />} /> 
+              <Route path="/worker/kyc/page" element={<KycPage />} /> 
+              <Route path="/worker/chat" element={<KycProtectedRoute>
+                                                    <ChatHomePage />
+                                                  </KycProtectedRoute>}/>             
+              <Route path="/worker/chat/:receiverId" element={<KycProtectedRoute>
+                                                    <ChatHomePage />
+                                                  </KycProtectedRoute>}/>
             </Route>
             
           </Route>
