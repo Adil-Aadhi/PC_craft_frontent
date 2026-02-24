@@ -2,11 +2,11 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB6j5d1-Yq3kGYEH6VBYjvbnG9tAQ4n8ik",
-  authDomain: "pc-customization-notification.firebaseapp.com",
-  projectId: "pc-customization-notification",
-  messagingSenderId: "1082009526884",
-  appId: "1:1082009526884:web:ea751558844c1b75ef3571",
+  apiKey:  import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -32,7 +32,7 @@ export const requestFCMToken = async () => {
     console.log("Service worker ready:", registration);
 
     const token = await getToken(messaging, {
-      vapidKey: "BNCYiQmqoi6HScKXdaScCaUnZI1R6ABurTnUYukh3u6svHLhfpO8GMl2iO1OBoH1OPkUH5eBMb-qOm-6FWDT_Hg",
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
       serviceWorkerRegistration: registration,
     });
 
