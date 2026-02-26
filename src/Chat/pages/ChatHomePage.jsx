@@ -37,8 +37,10 @@ const contentVariants = {
 const ChatHomePage = () => {
   const { receiverId } = useParams();
   const navigate = useNavigate();
-
   const location = useLocation();
+
+  const buildToSend = location.state?.buildToSend;
+
   const {user}=useAuth()
 
   const [users, setUsers] = useState([]);
@@ -244,7 +246,8 @@ const userMap = useMemo(() => {
               <div className="flex-1 min-h-0 overflow-y-auto">
                 <ChatLayout receiverId={Number(receiverId)}
                 roomName={roomName}
-                userMap={userMap} />
+                userMap={userMap}
+                buildToSend={buildToSend} />
               </div>
             </motion.div>
           ) : (

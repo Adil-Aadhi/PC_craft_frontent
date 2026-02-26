@@ -4,7 +4,7 @@ import { Outlet, useLocation } from "react-router-dom";
 const UserLayout = () => {
   const { pathname } = useLocation();
 
-  const lightPages = ["/user/profile"];
+  const lightPages = ["/user/profile","/user/notifications"];
 
   const variant = lightPages.includes(pathname) ? "light" : "dark";
 

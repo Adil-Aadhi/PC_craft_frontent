@@ -1,20 +1,16 @@
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {ShoppingCart,Trash2,Package,ShieldCheck,Truck,Clock,ChevronRight,Sparkles,AlertCircle,CheckCircle2,CreditCard,} from "lucide-react";
 import { useCompatibility } from "./hooks/useCompatibility";
 import React from "react";
 
 
-const RightCart = ({ build, onRemove }) => {
+const RightCart = ({ build, onRemove,onSaveClick }) => {
  const totalPrice = Object.values(build).reduce((sum, item) => {
   if (!item) return sum; // skip null
   return sum + item.price * (item.quantity || 1);
 }, 0);
 
 const { checkCompatibility } = useCompatibility();
-
-
-  const [estimatedDelivery, setEstimatedDelivery] = useState("3-5 days");
 
   const selectedCount = Object.values(build).filter(Boolean).length;
 
@@ -26,16 +22,11 @@ const { checkCompatibility } = useCompatibility();
 
 const hasIssues = incompatibleItems.length > 0;
 
-  const calculateSavings = () => {
-    // Mock savings calculation
-    return totalPrice > 50000 ? totalPrice * 0.1 : 0;
-  };
-
-  const savings = calculateSavings();
   const TOTAL_COMPONENTS = 9;
 
   const components = [
     { key: "cpu", label: "Processor", color: "cyan" },
+    { key: "motherboard", label: "MotherBoard", color: "cyan" },
     { key: "gpu", label: "Graphics Card", color: "emerald" },
     { key: "ram", label: "Memory", color: "purple" },
     { key: "storage", label: "Storage", color: "pink" },
@@ -44,7 +35,6 @@ const hasIssues = incompatibleItems.length > 0;
     { key: "casefan", label: "Case Fan", color: "sky" },
     { key: "cooler", label: "Cooler", color: "blue" },
   ];
-
   return (
     <div className="col-span-3 bg-gradient-to-br from-gray-900/40 to-gray-900/10 backdrop-blur-sm border border-cyan-500/20 rounded-2xl shadow-xl p-6 overflow-hidden">
       {/* Header */}
@@ -217,29 +207,13 @@ const hasIssues = incompatibleItems.length > 0;
         <div className="flex justify-between text-sm">
           <span className="text-gray-400">Subtotal</span>
           <span className="text-white">₹{totalPrice.toLocaleString()}</span>
-        </div>
-        
-        {savings > 0 && (
-          <div className="flex justify-between text-sm">
-            <span className="text-emerald-400 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              Bundle Savings
-            </span>
-            <span className="text-emerald-400">-₹{savings.toLocaleString()}</span>
-          </div>
-        )}
-        
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-400">Assembly Fee</span>
-          <span className="text-white">₹{totalPrice > 0 ? "2,499" : "0"}</span>
-        </div>
-        
+        </div>      
         <div className="pt-3 border-t border-cyan-500/20">
           <div className="flex justify-between text-lg font-bold">
             <span className="text-white">Total</span>
             <div className="text-right">
               <div className="text-2xl bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                ₹{(totalPrice - savings + (totalPrice > 0 ? 2499 : 0)).toLocaleString()}
+                ₹{(totalPrice).toLocaleString()}
               </div>
               <div className="text-xs text-gray-400 mt-1">Including all taxes</div>
             </div>
@@ -247,45 +221,20 @@ const hasIssues = incompatibleItems.length > 0;
         </div>
       </div>
 
-      {/* Benefits */}
-      <div className="space-y-2 mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-300">
-          <ShieldCheck className="h-4 w-4 text-cyan-400" />
-          <span>3-Year Warranty on Complete Build</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-300">
-          <Truck className="h-4 w-4 text-cyan-400" />
-          <span>Free Shipping with Tracking</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-300">
-          <Clock className="h-4 w-4 text-cyan-400" />
-          <span>Estimated Delivery: {estimatedDelivery}</span>
-        </div>
-      </div>
-
       {/* Action Buttons */}
       <div className="space-y-3">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          disabled={selectedCount  === 0 || hasIssues || selectedCount < TOTAL_COMPONENTS}
-          className={`w-full py-3 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-            selectedCount === 0
-              ? "bg-gray-800 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/40"
-          }`}
-        >
-          <CreditCard className="h-5 w-5" />
-          Proceed to Checkout
-          <ChevronRight className="h-5 w-5" />
-        </motion.button>
-        
-        <button className="w-full py-3 rounded-xl bg-gradient-to-r from-gray-800/40 to-gray-900/20 border border-cyan-500/30 text-white font-semibold hover:bg-gradient-to-r hover:from-gray-800/60 hover:to-gray-900/40 transition">
-          Save Build for Later
-        </button>
-      </div>
 
-      {/* Compatibility Warning */}
+        <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-red-500/10 to-yellow-500/10 border border-red-500/30">
+  <div className="flex items-start gap-2">
+    <AlertCircle className="h-4 w-4 text-amber-400 mt-[2px]" />
+    <p className="text-xs text-amber-50/50 leading-relaxed">
+      Assembly fee will be calculated after selecting a worker.  
+      Final price may vary based on service charges.
+    </p>
+  </div>
+</div>
+
+        {/* Compatibility Warning */}
       {selectedCount > 0 && selectedCount < TOTAL_COMPONENTS && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -303,6 +252,25 @@ const hasIssues = incompatibleItems.length > 0;
           </p>
         </motion.div>
       )}
+        
+       <motion.button
+          whileHover={selectedCount === 0 || selectedCount < TOTAL_COMPONENTS ? {} : { scale: 1.02 }}
+          whileTap={selectedCount === 0 || selectedCount < TOTAL_COMPONENTS ? {} : { scale: 0.98 }}
+          disabled={selectedCount === 0 || selectedCount < TOTAL_COMPONENTS}
+          onClick={onSaveClick}
+          className={`w-full py-3 rounded-xl font-semibold text-lg transition-all
+            ${
+              selectedCount === 0 || selectedCount < TOTAL_COMPONENTS
+                ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg hover:shadow-xl hover:shadow-cyan-500/30"
+            }
+          `}
+        >
+          Save Build
+        </motion.button>
+      </div>
+
+      
 
       {selectedCount === TOTAL_COMPONENTS && (
         <motion.div
@@ -321,6 +289,7 @@ const hasIssues = incompatibleItems.length > 0;
           </p>
         </motion.div>
       )}
+      
     </div>
   );
 };

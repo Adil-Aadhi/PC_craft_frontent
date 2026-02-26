@@ -2,6 +2,7 @@ const MENU = [
   { id: "personal", label: "Personal Info" },
   { id: "work", label: "Profesional Info" },
   { id: "payment", label: "UPI" },
+  { id: "security", label: "Security" },
 ];
 
 const ProfileTabs = ({ active, setActive }) => {

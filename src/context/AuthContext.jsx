@@ -2,6 +2,8 @@ import { createContext, useContext, useState,useEffect } from "react";
 import api from "../api/axios";
 import {useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { requestFCMToken, onMessageListener} from "../../src/utils/firebase"
+import NotificationToast from "../Worker/components/NotificationToast";
 
 const AuthContext = createContext();
 
@@ -40,10 +42,20 @@ export const AuthProvider = ({ children }) => {
 
       return user // success response
     } catch (err) {
-      const msg =
-      err.response?.data?.error ||
-      err.response?.data?.detail ||
-      "Registration failed";
+      let msg = "Registration failed";
+      const data = err.response?.data;
+      if (data) {
+        if (typeof data === "string") {
+          msg = data;
+        } else if (data.detail) {
+          msg = data.detail;
+        } else {
+          // DRF field errors → convert to string
+          msg = Object.values(data)
+            .flat()
+            .join(" ");
+        }
+      }
 
         setError(msg);
         toast(
@@ -52,7 +64,7 @@ export const AuthProvider = ({ children }) => {
                 Something went wrong
               </div>
               <div className="text-sm text-white/70 mt-0.5">
-                Your account couldn’t be created. Please try again.
+                {msg}, Please try again.
               </div>
             </div>
           );
@@ -157,6 +169,43 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     fetchUser();
   }, [accessToken]);
+
+  useEffect(() => {
+  if (!user) return;
+
+  const initFCM = async () => {
+    const token = await requestFCMToken();
+
+    if (token) {
+      await api.post("/notifications/save-token/", {
+        fcm_token: token,
+      });
+    }
+  };
+
+  initFCM();
+
+  const unsubscribe = onMessageListener((payload) => {
+    console.log("Notification received:", payload);
+
+    const title = payload?.notification?.title;
+    const body = payload?.notification?.body;
+
+    if (title && body) {
+      toast(<NotificationToast title={title} body={body} />, {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+    }
+  });
+
+  return () => unsubscribe?.();
+}, [user]);
 
 
   return (

@@ -8,6 +8,7 @@ const WebSocketProvider = ({ children }) => {
   const currentRoomRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [socketReady, setSocketReady] = useState(false);
 
   const token = localStorage.getItem("accessToken");
 
@@ -24,6 +25,7 @@ const WebSocketProvider = ({ children }) => {
     if (currentRoomRef.current !== roomName) {
       setMessages([]);
       setHistoryLoaded(false);
+      setSocketReady(false);
       currentRoomRef.current = roomName;
 
       if (socketRef.current) {
@@ -38,6 +40,10 @@ const WebSocketProvider = ({ children }) => {
       `ws://localhost/ws/chat/${roomName}/?token=${token}`
     );
 
+    socketRef.current.onopen = () => {
+      setSocketReady(true);   // 🔥 socket is ready
+    };
+
     socketRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
@@ -49,23 +55,28 @@ const WebSocketProvider = ({ children }) => {
       }
 
       // 💬 NEW MESSAGE
-      if (data.type === "chat_message") {
+      if (data.type === "chat_message" || data.type === "build_bundle") {
         setMessages((prev) => {
           const exists = prev.some((m) => m.id === data.payload.id);
           return exists ? prev : [...prev, data.payload];
         });
+        return;
       }
     };
 
     socketRef.current.onclose = () => {
       socketRef.current = null;
+      setSocketReady(false);
     };
   };
 
   const sendMessage = (data) => {
+    console.log("WS STATE:", socketRef.current?.readyState);
+    console.log("WS OUT STRING:", JSON.stringify(data));
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(JSON.stringify(data));
-    }
+    }else {
+    console.warn("WS NOT OPEN — message not sent");}
   };
 
   const disconnectWebSocket = () => {
@@ -84,7 +95,8 @@ const WebSocketProvider = ({ children }) => {
         connectWebSocket,
         user,
         historyLoaded,
-        disconnectWebSocket
+        disconnectWebSocket,
+        socketReady
       }}
     >
       {children}

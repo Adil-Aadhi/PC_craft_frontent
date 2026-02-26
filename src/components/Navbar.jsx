@@ -74,6 +74,20 @@ const Navbar = ({ variant = "dark" }) => {
     navigate("/chat");
   }
 
+  const HandleCartClick=()=>{
+      if (!user) {
+      toast(<LoginRequiredToast />, {
+        autoClose: false, // stays until action
+        closeOnClick: false,
+        toastId: "login-required",
+        draggable: false,
+      });
+      return;
+    }
+
+    navigate("/cart");
+  }
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
@@ -118,22 +132,19 @@ const Navbar = ({ variant = "dark" }) => {
                 </span>
               </Link>
 
-              {/* MENU */}
-              {/* <div className={`hidden md:flex gap-8 ${textSub}`}>
-                <a className={`${textSubHover}`}>Build</a>
-                <a className={`${textSubHover}`}>Components</a>
-                <a className={`${textSubHover}`}>Gallery</a>
-                <a className={`${textSubHover}`}>Support</a>
-              </div> */}
-
               {/* ACTIONS */}
               <div className="flex items-center gap-4">
                 <button onClick={HandleMessageClick}>
                   <MessageSquare className={`w-5 h-5 ${textSub} ${textSubHover}`} />
                 </button>
-                <ShoppingCart className={`w-5 h-5 ${textSub} ${textSubHover}`} />
-                <BellDot className={`w-5 h-5 ${textSub} ${textSubHover}`} />
-
+                <button onClick={HandleCartClick}>
+                  <ShoppingCart className={`w-5 h-5 ${textSub} ${textSubHover}`} />
+                </button>
+                
+                <button onClick={()=>navigate('/user/notifications')}>
+                  <BellDot className={`w-5 h-5 ${textSub} ${textSubHover}`} />
+                </button>
+                
                 <div
                   ref={userRef}
                   onMouseEnter={openMenu}

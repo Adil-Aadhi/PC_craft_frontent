@@ -27,36 +27,20 @@ const LeftPanel = ({
   componentData,
   build,
   onSelect,
-  loading
+  loading,
+  searchQuery,
+  setSearchQuery,
+  priceFilter,
+  setPriceFilter,
+  onLoadMore,
 }) => {
-  const [priceFilter, setPriceFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredItems = useMemo(() => {
-    return (componentData[activeCategory] || [])
-      .filter(item => {
-        if (priceFilter === "budget") return item.price < 20000;
-        if (priceFilter === "mid") return item.price >= 20000 && item.price < 50000;
-        if (priceFilter === "high") return item.price >= 50000;
-        return true;
-      })
-      .filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-  }, [componentData, activeCategory, priceFilter, searchQuery]);
 
   const activeComponentMeta = components.find(c => c.key === activeCategory);
   const { checkCompatibility } = useCompatibility();
   const dispatch = useDispatch();
-  const handleOpenModal = () => {
-      dispatch(
-        openComponentModal({
-          category: activeCategory, // cpu, gpu, etc
-          componentId: item.id,
-        })
-      );
-    };
+
+  const items = componentData[activeCategory]?.items || [];
+  const next = componentData[activeCategory]?.next;
 
   return (
     <div className="col-span-2 bg-gradient-to-br from-gray-900/40 to-gray-900/10 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 shadow-xl">
@@ -145,7 +129,7 @@ const LeftPanel = ({
             className="w-full bg-gray-900/50 border border-cyan-500/30 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30"
           />
           <div className="absolute right-3 top-3 text-gray-500">
-            {filteredItems.length} items
+            {items.length} items
           </div>
         </div>
 
@@ -177,17 +161,17 @@ const LeftPanel = ({
             Available {activeComponentMeta?.label}
           </h4>
           <span className="text-xs text-cyan-300">
-            {filteredItems.length} options
+            {items.length} options
           </span>
         </div>
 
         <div className="space-y-3 overflow-y-auto max-h-[400px] pr-2">
-            {loading && !(componentData[activeCategory]?.length) ? (
+            {loading && items.length === 0 && !next? (
               <LeftPanelSkeleton />
             ) : (
               <>
                 <AnimatePresence>
-                  {filteredItems.map((item, index) => {
+                  {items.map((item, index) => {
                     const selected = build[activeCategory]?.id === item.id;
                     const ComponentIcon = activeComponentMeta?.icon;
                     const { compatibility, message } = checkCompatibility(activeCategory, item);
@@ -251,11 +235,11 @@ const LeftPanel = ({
 
                                     <div className="text-right">
                                       <div className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                                        ₹{item.price.toLocaleString()}
+                                        ₹{Number(item.price).toLocaleString()}
                                       </div>
                                       {item.originalPrice && (
                                         <div className="text-xs text-gray-500 line-through">
-                                          ₹{item.originalPrice.toLocaleString()}
+                                          ₹{Number(item.originalPrice).toLocaleString()}
                                         </div>
                                       )}
                                     </div>
@@ -321,7 +305,7 @@ const LeftPanel = ({
                   })}
                 </AnimatePresence>
 
-                {filteredItems.length === 0 && (
+                {items.length === 0 && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -337,7 +321,15 @@ const LeftPanel = ({
             )}
           </div>
       </div>
-
+            {next && (
+          <button
+            onClick={onLoadMore}
+            disabled={loading}
+            className="w-full py-2 mt-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-sm disabled:opacity-50"
+          >
+            {loading ? "Loading..." : "Load more"}
+          </button>
+        )}
 
       
     </div>

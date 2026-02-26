@@ -19,6 +19,9 @@ import ChatHomePage from './Chat/pages/ChatHomePage'
 import UserLayout from './Customer/layout/UserLayout'
 import KycProtectedRoute from './Worker/layout/KYCProtectedRouter'
 import WorkerNotifications from './Notifications/pages/NotificationPage'
+import CartPage from './cart/pages/cartpage'
+import UserNotifications from './Customer/pages/NotificationPage'
+import ForgotPassword from './pages/ForgetPassword'
 
 function App() {
 
@@ -69,6 +72,7 @@ function App() {
 
           <Route path="/register/:role" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgetpassword" element={<ForgotPassword />} />
           
           
 
@@ -77,10 +81,12 @@ function App() {
 
             <Route element={<UserLayout />}>
               <Route path="/user/profile" element={<Profile />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/user/notifications" element={<UserNotifications />} />
             </Route>
 
             <Route path="/build" element={<BuildPC />} />
-            
+                        
             <Route path="/chat" element={<ChatHomePage />} />
             <Route path="/chat/:receiverId" element={<ChatHomePage />} />
           </Route>

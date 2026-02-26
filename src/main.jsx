@@ -12,6 +12,7 @@ import { WorkerPersonalInfoProvider } from './Worker/context/workerProfileInfoCo
 import WebSocketProvider from './Chat/context/WebSocketContext.jsx'
 import { Provider } from 'react-redux'
 import { store } from './Customer/Build/redux/store.js'
+import { CartProvider } from './cart/context/cartcontext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -23,9 +24,11 @@ createRoot(document.getElementById('root')).render(
         <AddressProvider>
           <WorkerPersonalInfoProvider>
               <WebSocketProvider>
-                <Provider store={store}>
-                <App />
-                </Provider>
+                <CartProvider>
+                  <Provider store={store}>
+                    <App />
+                  </Provider>
+                </CartProvider>
               </WebSocketProvider>
           </WorkerPersonalInfoProvider>
         </AddressProvider>

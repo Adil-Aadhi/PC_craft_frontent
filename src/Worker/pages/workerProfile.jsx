@@ -5,6 +5,7 @@ import ProfileTabs from "../components/profile/profileMenu";
 import ProfileOverview from "../components/profile/profileOverview";
 import WorkerProfessionalDetails from "../components/profile/profileWorkerProfessionalInfo";
 import WorkerUpiCard from "../components/profile/profileUpiComponent";
+import SecurityCard from "../../Customer/components/ProfileSecurityCard";
 
 
 
@@ -22,6 +23,8 @@ const WorkerProfile = () => {
         return <WorkerProfessionalDetails/>
       case "payment":
         return <WorkerUpiCard/>
+      case "security":
+        return <SecurityCard/>
       default:
         return null;
     }
