@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Zap, Menu, X, ShoppingCart, User,BellDot,MessageCircle,MessageSquare } from "lucide-react";
+import { Zap, Menu, X, ShoppingCart, User,BellDot,MessageSquare,BoxIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -143,6 +143,9 @@ const Navbar = ({ variant = "dark" }) => {
                 
                 <button onClick={()=>navigate('/user/notifications')}>
                   <BellDot className={`w-5 h-5 ${textSub} ${textSubHover}`} />
+                </button>
+                <button onClick={()=>navigate('/user/orders')}>
+                  <BoxIcon className={`w-5 h-5 ${textSub} ${textSubHover}`} />
                 </button>
                 
                 <div

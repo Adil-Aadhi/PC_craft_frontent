@@ -14,6 +14,7 @@ export default {
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
+        "spin-slow": "spin 3s linear infinite",
       },
        keyframes: {
         float: {

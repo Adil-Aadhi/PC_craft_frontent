@@ -117,15 +117,6 @@ const SectionHeader = ({ title, icon: Icon, count }) => (
 
 const BuildDetailsModal = ({ build, onClose,isWorker,currentStatus,onAccept,onReject,location }) => {
     const navigate=useNavigate()
-  // Safely get build ID for display
-
-
-//   const getBuildIdDisplay = () => {
-//     if (!build?.id) return '';
-//     // Convert to string first, then get last 6 characters
-//     const idString = String(build.id);
-//     return idString.slice(-6);
-//   };
 
   // Group components by category with safety checks
   const components = [

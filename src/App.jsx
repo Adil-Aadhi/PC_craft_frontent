@@ -22,6 +22,7 @@ import WorkerNotifications from './Notifications/pages/NotificationPage'
 import CartPage from './cart/pages/cartpage'
 import UserNotifications from './Customer/pages/NotificationPage'
 import ForgotPassword from './pages/ForgetPassword'
+import OrdersPage from './orders/pages/OrderMainPage'
 
 function App() {
 
@@ -83,6 +84,7 @@ function App() {
               <Route path="/user/profile" element={<Profile />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/user/notifications" element={<UserNotifications />} />
+              <Route path="/user/orders" element={<OrdersPage />} />
             </Route>
 
             <Route path="/build" element={<BuildPC />} />
