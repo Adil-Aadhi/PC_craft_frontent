@@ -11,6 +11,7 @@ import PleaseLogin from "../components/ProfileNoUserLogin";
 import ProfileAvatarCard from "../components/ProfileAvatar";
 import { useAuth } from "../../context/AuthContext";
 import ProfileMenu from "../components/ProfileMenu";
+import LogoutModal from "../../Admin/components/AdminLogoutModal";
 
 
 /* ---------------- ANIMATION VARIANTS ---------------- */
@@ -34,6 +35,7 @@ const ProfilePage = () => {
   
   const [activeSection, setActiveSection] = useState("avatar");
   const {handleLogout,user,authLoading}=useAuth()
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   if (authLoading) {
     return <div>Loading...</div>; // or spinner component
@@ -87,7 +89,7 @@ const ProfilePage = () => {
 
         <button
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-red-500 opacity-60"
-          onClick={handleLogout}
+          onClick={()=>setLogoutOpen(true)}
         >
           <FiLogOut /> Logout
         </button>
@@ -189,6 +191,11 @@ const ProfilePage = () => {
 
       </main>
     </div>
+    <LogoutModal
+                        isOpen={logoutOpen}
+                        onClose={() => setLogoutOpen(false)}
+                        onConfirm={handleLogout}
+                      />
   </div>
   );
 };

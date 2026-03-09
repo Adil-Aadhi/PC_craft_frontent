@@ -270,7 +270,7 @@ const BuildDetailsModal = ({ build, onClose,isWorker,currentStatus,onAccept,onRe
                    Rejected
                 </p>
               )}
-              {!isWorker && location === "cart" &&(
+              {!isWorker && location === "cart" && build.status !== "accepted" &&(
                   <button
                     onClick={() => navigate(`/build?edit=${build.id}`)}
                     className="bg-white/55 hover:bg-white/100 text-sm px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-1.5 border border-zinc-800"

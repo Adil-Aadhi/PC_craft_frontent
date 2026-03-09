@@ -23,6 +23,19 @@ import CartPage from './cart/pages/cartpage'
 import UserNotifications from './Customer/pages/NotificationPage'
 import ForgotPassword from './pages/ForgetPassword'
 import OrdersPage from './orders/pages/OrderMainPage'
+import WorkerProjects from './project/pages/ProjectMainPage'
+import WorkerProjectDetail from './project/components/WorkerOrderDetails'
+import WorkerProjectExecution from './project/components/WorkerOrderExecution'
+import AdminLayout from './Admin/components/AdminLayout'
+import AdminDashboard from './Admin/pages/AdminDashboard'
+import AdminUsers from './Admin/pages/AdminUSer'
+import AdminRevenue from './Admin/pages/AdminRevenue'
+import WorkerVerification from './Admin/pages/AdminWorkerVerification'
+import CompletionRequests from './Admin/pages/AdminWorkCompletion'
+import NotFound from './pages/NotFound'
+import { AdminStatsProvider } from './Admin/context/AdminStatsContext'
+import AdminOrders from './Admin/pages/AdminOrderPage'
+import WorkerRevenuePage from './Worker/pages/WorkerRevenuePage'
 
 function App() {
 
@@ -96,27 +109,73 @@ function App() {
           {/* 🧑‍🔧 WORKER ONLY */}
           <Route element={<ProtectedRoute allowedRoles={["worker"]} />}>
 
-            <Route element={<WorkerLayout />}>
-              <Route path="/worker/dashboard" element={<WorkerDashboard />} />
-              <Route path="/worker/profile" element={<KycProtectedRoute >
-                                                      <WorkerProfile/>
-                                                  </KycProtectedRoute>} />
-              <Route path="/worker/notifications" element={<WorkerNotifications />} /> 
-              <Route path="/worker/kyc/page" element={<KycPage />} /> 
-              <Route path="/worker/chat" element={<KycProtectedRoute>
-                                                    <ChatHomePage />
-                                                  </KycProtectedRoute>}/>             
-              <Route path="/worker/chat/:receiverId" element={<KycProtectedRoute>
-                                                    <ChatHomePage />
-                                                  </KycProtectedRoute>}/>
+            <Route path="/worker" element={<WorkerLayout />}>
+
+              <Route path="dashboard" element={<WorkerDashboard />} />
+              <Route path="profile" element={
+                <KycProtectedRoute>
+                  <WorkerProfile />
+                </KycProtectedRoute>
+              } />
+
+              <Route path="notifications" element={<WorkerNotifications />} />
+              <Route path="kyc/page" element={<KycPage />} />
+
+              <Route path="chat" element={
+                <KycProtectedRoute>
+                  <ChatHomePage />
+                </KycProtectedRoute>
+              } />
+
+              <Route path="chat/:receiverId" element={
+                <KycProtectedRoute>
+                  <ChatHomePage />
+                </KycProtectedRoute>
+              } />
+
+              <Route path="projects" element={<WorkerProjects />} />
+              <Route path="projects/:id" element={<WorkerProjectDetail />} />
+              <Route path="execution/:id" element={<WorkerProjectExecution />} />
+
+              <Route path="revenue" element={<WorkerRevenuePage />} />
+              
+
+              {/* 🔥 THIS WILL START WORKING */}
+
             </Route>
-            
+
           </Route>
 
-          {/* 👑 ADMIN ONLY */}
+         {/* 🛠 ADMIN ONLY */}
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-            {/* admin routes here */}
+
+            <Route
+                  element={
+                    <AdminStatsProvider>
+                      <AdminLayout />
+                    </AdminStatsProvider>
+                  }
+                >
+
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+              <Route path="/admin/users" element={<AdminUsers />} />
+
+              <Route path="/admin/workers" element={<WorkerVerification />} />
+
+              <Route path="/admin/completions" element={<CompletionRequests />} />
+
+              <Route path="/admin/orders" element={<AdminOrders />} />
+
+              {/* <Route path="/admin/payments" element={<AdminPayments />} /> */}
+
+              <Route path="/admin/revenue" element={<AdminRevenue />} />
+
+            </Route>
+
           </Route>
+
+          <Route path="*" element={<NotFound />} />
 
         </Routes>
     </>

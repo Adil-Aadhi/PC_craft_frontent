@@ -5,6 +5,7 @@ import { closeComponentModal } from "../../redux/components/componentModalSlice"
 import { useCompatibility } from "../../hooks/useCompatibility";
 import {XMarkIcon,CheckCircleIcon,ExclamationTriangleIcon,ShoppingBagIcon,} from "@heroicons/react/24/outline";
 import {Cpu,CircuitBoard,MemoryStick,HardDrive,Monitor,Power,Box,Fan,Snowflake} from "lucide-react";
+import { useAuth } from "../../../../context/AuthContext";
 
 import { useState } from "react";
 import CPUSpec from "./cpuspec";
@@ -20,7 +21,8 @@ import CoolerSpec from "./coolerspec";
 const ModalContent = ({ category, component }) => {
   const dispatch = useDispatch();
   const [imageLoaded, setImageLoaded] = useState(false);
-
+  const {user}=useAuth()
+  const isWorker=user?.role==="worker"
   const selectedItem = useSelector(selectSelectedByCategory(category));
   const isSelected = selectedItem?.id === component.id;
 
@@ -165,34 +167,38 @@ const ModalContent = ({ category, component }) => {
         >
           Cancel
         </button>
-
-        <button
-          disabled={isSelected}
-          onClick={handleAddToBuild}
-          className={`relative overflow-hidden group px-8 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
-            isSelected
-              ? "bg-green-600 cursor-not-allowed opacity-90"
-              : "bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-400 hover:to-cyan-300 text-black"
-          }`}
-        >
-          {!isSelected && (
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          )}
-
-          <span className="relative flex items-center gap-2">
-            {isSelected ? (
-              <>
-                <CheckCircleIcon className="w-5 h-5" />
-                Selected
-              </>
-            ) : (
-              <>
-                <ShoppingBagIcon className="w-5 h-5" />
-                Add to Build
-              </>
+        {
+          !isWorker && (
+            <button
+            disabled={isSelected}
+            onClick={handleAddToBuild}
+            className={`relative overflow-hidden group px-8 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
+              isSelected
+                ? "bg-green-600 cursor-not-allowed opacity-90"
+                : "bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-400 hover:to-cyan-300 text-black"
+            }`}
+          >
+            {!isSelected && (
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             )}
-          </span>
-        </button>
+
+            <span className="relative flex items-center gap-2">
+              {isSelected ? (
+                <>
+                  <CheckCircleIcon className="w-5 h-5" />
+                  Selected
+                </>
+              ) : (
+                <>
+                  <ShoppingBagIcon className="w-5 h-5" />
+                  Add to Build
+                </>
+              )}
+            </span>
+          </button>
+            )
+          }
+          
       </div>
     </div>
   );

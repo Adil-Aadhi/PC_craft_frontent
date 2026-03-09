@@ -10,10 +10,13 @@ const ComponentModal = ({ componentData }) => {
     (state) => state.componentModal
   );
 
-  const component = category
-    ? componentData[category]?.find((item) => item.id === componentId)
-    : null;
+ const data = category ? componentData[category]?.items : null;
 
+  const component = Array.isArray(data)
+    ? data.find((item) => item.id === componentId)
+    : data?.id === componentId
+    ? data
+    : null;
   // 🔒 Lock background scroll
   useEffect(() => {
     if (isOpen) {

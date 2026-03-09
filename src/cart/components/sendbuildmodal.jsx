@@ -85,31 +85,46 @@ const SendBuildModal = ({ build, onClose }) => {
               No workers available
             </p>
           ) : (
-            workers.map((room) => (
-              <div
-                key={room.id}
-                onClick={() => setSelectedRoom(room)}
-                className={`p-3 rounded-lg border cursor-pointer transition ${
-                  selectedRoom?.id === room.id
-                    ? "border-cyan-500 bg-cyan-500/10"
-                    : "border-zinc-700 hover:border-zinc-500"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={
-                      room.other_user?.profile_image ||
-                      "/default-avatar.png"
-                    }
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <p className="text-sm text-white">
-                    {room.other_user?.full_name}
-                  </p>
+            workers.map((room) => {
+              const rating = room.other_user?.worker_profile?.rating;
+
+              return (
+                <div
+                  key={room.id}
+                  onClick={() => setSelectedRoom(room)}
+                  className={`p-3 rounded-lg border cursor-pointer transition ${
+                    selectedRoom?.id === room.id
+                      ? "border-cyan-500 bg-cyan-500/10"
+                      : "border-zinc-700 hover:border-zinc-500"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={
+                        room.other_user?.profile_image ||
+                        "/default-avatar.png"
+                      }
+                      alt=""
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+
+                    <div>
+                      <p className="text-sm text-white">
+                        {room.other_user?.full_name}
+                      </p>
+
+                      <p className="text-xs text-zinc-400">
+                        {room.other_user?.rating && room.other_user?.rating > 0 ? (
+                          <span className="text-yellow-400">⭐ {room.other_user?.rating}</span>
+                        ) : (
+                          "No rating"
+                        )}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

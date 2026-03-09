@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import LoginRequiredToast from "./LoginRequiredToast";
 import { useAuth } from "../context/AuthContext";
+import LogoutModal from "../Admin/components/AdminLogoutModal";
 
 const Navbar = ({ variant = "dark" }) => {
   const { handleLogout } = useAuth();
@@ -13,6 +14,7 @@ const Navbar = ({ variant = "dark" }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const navigate=useNavigate()
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const {user}=useAuth();
 
@@ -212,7 +214,7 @@ const Navbar = ({ variant = "dark" }) => {
                   </div>
 
                   <button
-                    onClick={handleLogout}
+                    onClick={()=>setLogoutOpen(true)}
                     className="w-full text-left px-4 py-1 hover:bg-red-500/20 text-red-400"
                   >
                     Logout
@@ -221,6 +223,11 @@ const Navbar = ({ variant = "dark" }) => {
               )}
         </div>
       )}
+      <LogoutModal
+                    isOpen={logoutOpen}
+                    onClose={() => setLogoutOpen(false)}
+                    onConfirm={handleLogout}
+                  />
     </>
   );
 };

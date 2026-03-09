@@ -2,12 +2,22 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const PublicRoute = () => {
-  // const accessToken = localStorage.getItem("accessToken");
-  // const user = JSON.parse(localStorage.getItem("user"));
   const {user,authLoading,accessToken}=useAuth()
 
-  if (accessToken && user?.role === "worker") {
-    return <Navigate to="/worker/dashboard" replace />;
+  if (authLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (accessToken && user) {
+
+    if (user.role === "worker") {
+      return <Navigate to="/worker/dashboard" replace />;
+    }
+
+    if (user.role === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+
   }
 
   return <Outlet />;

@@ -43,6 +43,7 @@ const useSecurity = () => {
       }, 1200);
     } catch (err) {
       const msg =
+        err.response?.data?.old_password?.[0] ||
         err.response?.data?.detail ||
         "Failed to change password";
 

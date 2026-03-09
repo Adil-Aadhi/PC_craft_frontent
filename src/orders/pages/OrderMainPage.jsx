@@ -4,32 +4,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { fetchMyOrders } from "../../Customer/Build/redux/components/orders/orderslice";
 import StatusCard from "../components/StatusCard";
 import BuildDetailsModal from "../../cart/components/cartcomponentmodel";
-import { 
-  Clock, 
-  Cpu, 
-  CreditCard, 
-  XCircle, 
-  CheckCircle, 
-  Package,
-  Calendar,
-  Hash,
-  Eye,
-  Zap,
-  Server,
-  HardDrive,
-  ChevronRight,
-  Search,
-  Filter
+import {
+  Clock, Cpu, CreditCard, XCircle, ShieldCheck, Package, Calendar, Hash, Eye, Zap, Server, HardDrive, ChevronRight,Star , Gamepad2,FileText
 } from "lucide-react";
+import { toast } from "react-toastify";
+import api from "../../api/axios"; 
+import {useAuth} from "../../context/AuthContext"
+import ExecutionProgressModal from "../../project/components/ExecutionProgressModal";
+import ReviewModal from "../components/ReviewModal";
 
 // Main OrdersPage Component
 const OrdersPage = () => {
   const dispatch = useDispatch();
   const { orders, loading } = useSelector((state) => state.orders);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const {user}=useAuth()
+  const [cancelOrderId, setCancelOrderId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [progressData, setProgressData] = useState(null);
+  const [reviewOrder, setReviewOrder] = useState(null); 
 
   useEffect(() => {
     dispatch(fetchMyOrders());
@@ -37,129 +30,250 @@ const OrdersPage = () => {
 
   if (loading) {
     return (
-      <div className="p-6 flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center min-h-screen bg-[#050505]">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="rounded-full h-12 w-12 border-b-2 border-blue-600"
+          className="rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
         />
       </div>
     );
   }
 
-  const pending = orders.filter(o => o.status === "PAYMENT_PENDING").length;
-  const processing = orders.filter(o => o.status === "BUILD_IN_PROGRESS").length;
   const completed = orders.filter(o => o.status === "COMPLETED").length;
   const cancelled = orders.filter(o => o.status === "CANCELLED").length;
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.build?.build_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         order.id?.toString().includes(searchTerm) ||
-                         order.build?.id?.toString().includes(searchTerm);
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredOrders = orders;
 
-  const handlePay = (orderId) => {
-    console.log("Pay order", orderId);
-    // Razorpay later
+  const loadRazorpay = () => {
+      return new Promise((resolve) => {
+        if (window.Razorpay) {
+          resolve(true);
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+
+        document.body.appendChild(script);
+      });
+    };
+
+  const handlePayment = async (orderId) => {
+        try {
+          const razorpayLoaded = await loadRazorpay();
+          if (!razorpayLoaded) {
+            toast.error("Razorpay SDK failed to load.");
+            return;
+          }
+          const res = await api.post(
+            "/orders/create-razorpay-order/",
+            { order_id: orderId },
+          );
+
+          const { razorpay_order_id, amount, key } = res.data;
+
+          const options = {
+              key: key,
+              amount: amount,
+              currency: "INR",
+              name: "PC-Craft",
+              description: "PC Build Order Payment",
+              order_id: razorpay_order_id,
+
+              handler: async function (response) {
+                await api.post("/orders/verify-razorpay-payment/", {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                });
+
+                toast.success("Payment successful ✅");
+                dispatch(fetchMyOrders());
+              },
+
+              modal: {
+                ondismiss: function () {
+                  toast.error("Payment cancelled ❌");
+                }
+              },
+
+              prefill: {
+                name: user.name,
+                email: user.email,
+              },
+
+              theme: {
+                color: "#6366f1",
+              },
+            };
+
+          // 4️⃣ Open Razorpay modal
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+          rzp.on("payment.failed", function (response) {
+            console.error(response.error);
+            toast.error("Payment failed ❌");
+          });
+
+        } catch (error) {
+          console.error(error);
+          toast.error("Payment initialization failed");
+        }
+      };
+
+  const handleCancel = async () => {
+    try {
+      await api.post(`/orders/my-orders/cancel/${cancelOrderId}/`);
+
+      toast.success("Order cancelled");
+
+      setCancelOrderId(null);
+      dispatch(fetchMyOrders());
+    } catch (error) {
+      console.error(error);
+      toast.error("Cancel failed");
+    }
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case "PAYMENT_PENDING": return Clock;
-      case "BUILD_IN_PROGRESS": return Package;
-      case "COMPLETED": return CheckCircle;
+      case "BUILD_IN_PROGRESS": return Gamepad2;
+      case "COMPLETED": return ShieldCheck;
       case "CANCELLED": return XCircle;
       default: return Package;
     }
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case "PAYMENT_PENDING": return "from-amber-500 to-orange-500";
-      case "BUILD_IN_PROGRESS": return "from-blue-500 to-indigo-500";
-      case "COMPLETED": return "from-emerald-500 to-green-500";
-      case "CANCELLED": return "from-rose-500 to-red-500";
-      default: return "from-gray-500 to-slate-500";
+  const getStatusStyles = (status) => {
+    switch (status) {
+      case "PAYMENT_PENDING":
+        return {
+          bg: "bg-amber-500/10",
+          border: "border-amber-500/20",
+          text: "text-amber-400",
+          glow: "shadow-[0_0_15px_-3px_rgba(245,158,11,0.3)]"
+        };
+      case "BUILD_IN_PROGRESS":
+        return {
+          bg: "bg-blue-500/10",
+          border: "border-blue-500/20",
+          text: "text-blue-400",
+          glow: "shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]"
+        };
+      case "COMPLETED":
+        return {
+          bg: "bg-emerald-500/10",
+          border: "border-emerald-500/20",
+          text: "text-emerald-400",
+          glow: "shadow-[0_0_15px_-3px_rgba(16,185,129,0.3)]"
+        };
+      case "CANCELLED":
+        return {
+          bg: "bg-rose-500/10",
+          border: "border-rose-500/20",
+          text: "text-rose-400",
+          glow: "shadow-[0_0_15px_-3px_rgba(244,63,94,0.3)]"
+        };
+      default:
+        return {
+          bg: "bg-zinc-500/10",
+          border: "border-zinc-500/20",
+          text: "text-zinc-400",
+          glow: "shadow-[0_0_15px_-3px_rgba(113,113,122,0.3)]"
+        };
     }
   };
 
   const getStatusDisplay = (status) => {
-    switch(status) {
+    switch (status) {
       case "PAYMENT_PENDING": return "Pending Payment";
-      case "BUILD_IN_PROGRESS": return "Processing";
-      case "COMPLETED": return "Completed";
+      case "BUILD_IN_PROGRESS": return "In Production";
+      case "COMPLETED": return "Ready for Deployment";
       case "CANCELLED": return "Cancelled";
       default: return status;
     }
   };
 
-  const statusOptions = [
-    { value: "all", label: "All Orders", icon: Package },
-    { value: "PAYMENT_PENDING", label: "Pending Payment", icon: Clock },
-    { value: "BUILD_IN_PROGRESS", label: "Processing", icon: Package },
-    { value: "COMPLETED", label: "Completed", icon: CheckCircle },
-    { value: "CANCELLED", label: "Cancelled", icon: XCircle },
-  ];
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-900 ">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header with glass morphism */}
+    <div className="mt-5 min-h-screen bg-[#030303] text-white relative overflow-hidden font-sans">
+      {/* Background glowing effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_60%,transparent_100%)] pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative  pt-24">
+        {/* Header section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-24 mb-8"
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
         >
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-100 via-white to-gray-300 bg-clip-text text-transparent">
-                  My Orders
-                </h1>
-              <p className="text-gray-500 mt-2 flex items-center gap-2">
-                <Package className="w-4 h-4" />
-                Track and manage your PC build orders
-              </p>
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
+              <Zap className="w-4 h-4" />
+              <span>Order Dashboard</span>
             </div>
-            <motion.div 
-              whileHover={{ scale: 1.05 }}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg shadow-blue-500/25"
-            >
-              <p className="text-lg font-semibold">{orders.length} Total Orders</p>
-            </motion.div>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
+              Command Center
+            </h1>
+            <p className="text-zinc-400 text-lg flex items-center gap-2 max-w-xl">
+              Track, manage, and oversee the status of your premium custom PC builds.
+            </p>
           </div>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="px-6 py-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl flex items-center gap-4 group"
+          >
+            <div className="p-3 bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors border border-blue-500/20 rounded-xl">
+              <Package className="w-6 h-6 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm text-zinc-400 font-medium">Total Orders</p>
+              <p className="text-2xl font-bold font-mono tracking-tight">{orders.length}</p>
+            </div>
+          </motion.div>
         </motion.div>
 
-        {/* Status Cards with Icons */}
-        <motion.div 
+        {/* Status Cards */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12"
         >
-          <StatusCard 
-            title="Pending Payment" 
-            count={pending} 
-            color="yellow" 
-            icon="pending"
-          />
-          <StatusCard 
-            title="Processing" 
-            count={processing} 
-            color="blue" 
-            icon="processing"
-          />
-          <StatusCard 
-            title="Completed" 
-            count={completed} 
-            color="green" 
+          <StatusCard
+            title="Ready / Shipped"
+            count={completed}
+            color="green"
             icon="completed"
           />
-          <StatusCard 
-            title="Cancelled" 
-            count={cancelled} 
-            color="red" 
+          <StatusCard
+            title="Cancelled"
+            count={cancelled}
+            color="red"
             icon="cancelled"
           />
         </motion.div>
@@ -169,165 +283,259 @@ const OrdersPage = () => {
           {filteredOrders.length === 0 ? (
             <motion.div
               key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-gray-900/60 border border-gray-700 text-gray-400 backdrop-blur-lg rounded-3xl p-16 text-center shadow-xl "
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex flex-col items-center justify-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl backdrop-blur-sm"
             >
-              <Package className="w-20 h-20 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-xl">No orders found</p>
-              {/* {searchTerm && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSearchTerm("")}
-                  className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/25"
-                >
-                  Clear Search
-                </motion.button>
-              )} */}
+              <div className="p-6 bg-white/5 rounded-full mb-6 ring-1 ring-white/10">
+                <Package className="w-12 h-12 text-zinc-500" />
+              </div>
+              <p className="text-xl font-medium text-white mb-2">No missions found</p>
+              <p className="text-zinc-500 text-center max-w-sm">
+                No orders have been placed yet.
+              </p>
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               key="list"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-4"
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="space-y-6"
             >
-              {filteredOrders.map((order, index) => {
-                const StatusIcon = getStatusIcon(order.status);
+              {filteredOrders.map((order) => {
+                const styles = getStatusStyles(order.status);
+                let StatusIcon = getStatusIcon(order.status);
+
                 return (
                   <motion.div
                     key={order.order_id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    variants={itemVariants}
                     whileHover={{ y: -4 }}
                     className="group relative"
                   >
-                    {/* Gradient Border Effect */}
-                    <div className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-500/40 via-blue-500/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-60 transition duration-300 blur`} />
-                    
-                    {/* Main Card */}
-                    <div className="relative bg-zinc-900/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border text-white border-gray-100">
-                      {/* Status Badge */}
-                      <div className="absolute top-6 right-6">
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${getStatusColor(order.status)} text-white rounded-xl shadow-lg`}
-                        >
-                          <StatusIcon className="w-4 h-4" />
-                          <span className="text-sm font-semibold">
-                            {getStatusDisplay(order.status)}
-                          </span>
-                        </motion.div>
-                      </div>
+                    {/* Glowing Effect on Hover */}
+                    <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-blue-500/0 rounded-[24px] opacity-0 group-hover:from-blue-500/30 group-hover:via-purple-500/30 group-hover:to-blue-500/30 group-hover:opacity-100 blur-[10px] transition-all duration-700 pointer-events-none" />
 
-                      <div className="flex flex-col gap-5">
-                        {/* Header */}
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 pr-32">
-                          <div>
-                            <h3 className="text-xl font-bold text-white/80">
+                    {/* Card Content */}
+                    <div className="relative bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-[24px] overflow-hidden p-6 hover:bg-zinc-900/80 transition-all duration-500">
+
+                      {/* Top Header Row */}
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
+                        <div>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-2xl font-bold text-white tracking-tight">
                               {order.build?.build_name || "Custom PC Build"}
                             </h3>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                              <span className="flex items-center gap-1">
-                                <Hash className="w-4 h-4" />
-                                ORDR{order.order_id.slice(0, 8).toUpperCase()}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                {order.created_at
-                                  ? new Date(order.created_at).toLocaleDateString('en-US', {
-                                      year: 'numeric',
-                                      month: 'short',
-                                      day: 'numeric'
-                                    })
-                                  : "N/A"}
-                              </span>
+                            <div className={`px-3 py-1 rounded-full border text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${styles.bg} ${styles.border} ${styles.text} ${styles.glow}`}>
+                              <StatusIcon className="w-3.5 h-3.5" />
+                              {getStatusDisplay(order.status)}
                             </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-zinc-500 font-mono">
+                            <span className="flex items-center gap-1.5 bg-white/5 py-1 px-2.5 rounded-lg border border-white/5">
+                              <Hash className="w-4 h-4 text-zinc-400" />
+                              <span className="text-zinc-300">ODR{order.order_id.slice(0, 8).toUpperCase()}</span>
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="w-4 h-4 text-zinc-400" />
+                              {order.created_at
+                                ? new Date(order.created_at).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })
+                                : "N/A"}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Components Grid */}
-                        {order.build && (
-                          <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.1 }}
-                            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
-                          >
-                            {order.build.cpu && (
-                              <div className="flex items-center gap-2 p-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
-                                <Cpu className="w-4 h-4 text-blue-500" />
-                                <span className="text-xs font-medium text-gray-700 truncate">
-                                  {order.build.cpu.name.split(" ").slice(0, 2).join(" ")}
-                                </span>
+                        {/* Price Block */}
+                        <div className="text-left md:text-right p-4 bg-white/5 rounded-2xl border border-white/5 w-full md:w-auto">
+                          <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-1">Total Payload</p>
+                          <p className="text-3xl font-black bg-gradient-to-br from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+                            ₹{order.total_price?.toLocaleString("en-IN") || "0"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Hardware Specs Grid */}
+                      {order.build && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 bg-black/20 p-4 rounded-2xl border border-white/5">
+                          {order.build.cpu && (
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                                <Cpu className="w-5 h-5 text-blue-400" />
                               </div>
-                            )}
-                            {order.build.gpu && (
-                              <div className="flex items-center gap-2 p-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
-                                <Server className="w-4 h-4 text-purple-500" />
-                                <span className="text-xs font-medium text-gray-700 truncate">
-                                  {order.build.gpu.name.split(" ").slice(0, 2).join(" ")}
-                                </span>
+                              <div className="overflow-hidden">
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Processor</p>
+                                <p className="text-sm font-medium text-zinc-200 truncate pr-2">
+                                  {order.build.cpu.name.split(" ").slice(0, 3).join(" ")}
+                                </p>
                               </div>
-                            )}
-                            {order.build.ram && (
-                              <div className="flex items-center gap-2 p-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
-                                <Zap className="w-4 h-4 text-yellow-500" />
-                                <span className="text-xs font-medium text-gray-700">
+                            </div>
+                          )}
+                          {order.build.gpu && (
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                                <Server className="w-5 h-5 text-purple-400" />
+                              </div>
+                              <div className="overflow-hidden">
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Graphics</p>
+                                <p className="text-sm font-medium text-zinc-200 truncate pr-2">
+                                  {order.build.gpu.name.split(" ").slice(0, 3).join(" ")}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          {order.build.ram && (
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
+                                <Zap className="w-5 h-5 text-yellow-400" />
+                              </div>
+                              <div className="overflow-hidden">
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Memory</p>
+                                <p className="text-sm font-medium text-zinc-200">
                                   {order.build.ram.capacity_gb}GB RAM
-                                </span>
+                                </p>
                               </div>
-                            )}
-                            {order.build.storage && (
-                              <div className="flex items-center gap-2 p-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
-                                <HardDrive className="w-4 h-4 text-emerald-500" />
-                                <span className="text-xs font-medium text-gray-700 truncate">
-                                  {order.build.storage.capacity_gb}GB Storage
-                                </span>
+                            </div>
+                          )}
+                          {order.build.storage && (
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                                <HardDrive className="w-5 h-5 text-emerald-400" />
                               </div>
-                            )}
-                          </motion.div>
-                        )}
+                              <div className="overflow-hidden">
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Storage</p>
+                                <p className="text-sm font-medium text-zinc-200 truncate pr-2">
+                                  {order.build.storage.capacity_gb}GB
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
-                        {/* Price and Actions */}
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-gray-100">
-                          <div>
-                            <p className="text-sm text-gray-500">Total Amount</p>
-                            <p className="text-3xl font-bold bg-gradient-to-r from-gray-100 via-white to-gray-300 bg-clip-text text-transparent drop-shadow-sm">
-                              ₹{order.total_price?.toLocaleString("en-IN")}
-                            </p>
-                          </div>
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row justify-end items-center gap-3">
 
-                          <div className="flex gap-3 w-full sm:w-auto">
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => setSelectedOrder(order)}
-                              className="flex-1 sm:flex-none px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2"
+                        {order.status === "COMPLETED" && !order.review && (
+                            <button
+                              onClick={() => setReviewOrder(order)}
+                              className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
                             >
-                              <Eye className="w-4 h-4" />
-                              View Details
-                            </motion.button>
+                              ⭐ Rate Worker
+                            </button>
+                          )}
 
-                            {order.status === "PAYMENT_PENDING" && (
+                          {order.review && (
+                              <div className="mt-2 flex flex-col gap-1">
+
+                                {/* Label */}
+                                <span className="text-xs text-zinc-400 font-medium">
+                                  Your Rating
+                                </span>
+
+                                {/* Stars */}
+                                <div className="flex items-center gap-2">
+                                  {[1,2,3,4,5].map((star)=>(
+                                    <Star
+                                      key={star}
+                                      size={18}
+                                      className={
+                                        star <= order.review.rating
+                                          ? "text-yellow-400 fill-yellow-400"
+                                          : "text-gray-300"
+                                      }
+                                    />
+                                  ))}
+                                </div>
+
+                              </div>
+                            )}
+
+                          {/* Inspect Blueprint (modal) */}
+                          {order.status=="BUILD_IN_PROGRESS" &&(
+                            <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                           onClick={async () => {
+                                const res = await api.get(
+                                  `/orders/worker-project/${order.order_id}/component/progress/`
+                                );
+                                setProgressData(res.data);
+                                setShowModal(true);
+                              }}
+                            className="w-full sm:w-auto px-6 py-3 bg-orange-400 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition border border-white/10 flex items-center justify-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                             View Detailed Progress
+                          </motion.button>
+                          )}
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setSelectedOrder(order)}
+                            className="w-full sm:w-auto px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-semibold transition border border-white/10 flex items-center justify-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Inspect Blueprint
+                          </motion.button>
+
+                          {/* 📄 View Quotation */}
+                          {order.quotation_pdf && order.status=="PAYMENT_PENDING" && (
+                            <a
+                              href={order.quotation_pdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full sm:w-auto px-6 py-3 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-xl text-sm font-semibold border border-emerald-500/30 flex items-center justify-center gap-2 transition"
+                            >
+                              <FileText className="w-4 h-4" />
+                              View Quotation
+                            </a>
+                          )}
+                          {order.invoice_pdf && (
+                            <a
+                              href={order.invoice_pdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-6 py-3 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-sm font-semibold border border-blue-500/30 flex items-center gap-2"
+                            >
+                              Download Invoice
+                            </a>
+                          )}
+                          
+
+                          {order.status === "PAYMENT_PENDING" && (
                               <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                onClick={() => handlePay(order.uuid)}
-                                className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-green-500/25 flex items-center justify-center gap-2"
+                                onClick={() =>setCancelOrderId(order.order_id)}
+                                className="w-full sm:w-auto px-6 py-3 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white rounded-xl text-sm font-bold border border-red-500/40 flex items-center justify-center gap-2"
                               >
-                                <CreditCard className="w-4 h-4" />
-                                Pay Now
-                                <ChevronRight className="w-4 h-4" />
+                                Cancel Order
                               </motion.button>
                             )}
-                          </div>
+
+                          {/* 💳 Pay Now */}
+                          {order.status === "PAYMENT_PENDING" && (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => handlePayment(order.order_id)}
+                              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_-5px_rgba(79,70,229,0.5)] flex items-center justify-center gap-2 border border-indigo-500/50"
+                            >
+                              <CreditCard className="w-4 h-4" />
+                              Initialize Payment
+                              <ChevronRight className="w-4 h-4" />
+                            </motion.button>
+                          )}
+
                         </div>
-                      </div>
+
                     </div>
                   </motion.div>
                 );
@@ -336,41 +544,71 @@ const OrdersPage = () => {
           )}
         </AnimatePresence>
 
-        {/* Order Details Modal with Animation */}
+        {/* Modal */}
+
+        {selectedOrder && (
+          <BuildDetailsModal
+            build={selectedOrder.build}
+            onClose={() => setSelectedOrder(null)}
+          />
+        )}
         <AnimatePresence>
-          {selectedOrder && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 overflow-y-auto"
-            >
-              <div className="flex items-center justify-center min-h-screen px-4">
+              {cancelOrderId && (
                 <motion.div
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  onClick={() => setSelectedOrder(null)}
-                  className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                />
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                  className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
                 >
-                  <BuildDetailsModal 
-                    build={selectedOrder.build} 
-                    onClose={() => setSelectedOrder(null)} 
-                  />
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-md"
+                  >
+                    <h2 className="text-xl font-bold text-white mb-4">
+                      Cancel this order?
+                    </h2>
+
+                    <p className="text-zinc-400 mb-6">
+                      This action cannot be undone. Your order will be permanently cancelled.
+                    </p>
+
+                    <div className="flex justify-end gap-3">
+                      <button
+                        onClick={() => setCancelOrderId(null)}
+                        className="px-5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10"
+                      >
+                        No
+                      </button>
+
+                      <button
+                        onClick={handleCancel}
+                        className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold"
+                      >
+                        Yes, Cancel
+                      </button>
+                    </div>
+                  </motion.div>
                 </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              )}
+            </AnimatePresence>
+
       </div>
+      <ExecutionProgressModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        progressData={progressData}
+      />
+      {reviewOrder && (
+      <ReviewModal
+        order={reviewOrder}
+        onClose={() => setReviewOrder(null)}
+        onReviewSuccess={() => dispatch(fetchMyOrders())}
+      />
+    )}
     </div>
   );
 };
 
-export default OrdersPage;
+export default OrdersPage; 

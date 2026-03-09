@@ -1,11 +1,15 @@
 import {
-  FiFileText,
-  FiCalendar,
-  FiPlus,
-  FiSettings,
+  FiBriefcase,
+  FiMessageCircle,
+  FiBell,
+  FiUser,
+
 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 export default function QuickActions() {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-white rounded-xl shadow p-6">
       {/* Header */}
@@ -16,20 +20,31 @@ export default function QuickActions() {
       {/* Actions Grid */}
       <div className="grid grid-cols-2 gap-4">
         <ActionCard
-          icon={<FiFileText className="text-blue-500" />}
-          label="New Quote"
+          icon={<FiBriefcase className="text-blue-500" />}
+          label="Projects"
+          path="/worker/projects"
+          navigate={navigate}
         />
+
         <ActionCard
-          icon={<FiCalendar className="text-green-500" />}
-          label="Schedule Work"
+          icon={<FiMessageCircle className="text-green-500" />}
+          label="Messages"
+          path="/worker/chat"
+          navigate={navigate}
         />
+
         <ActionCard
-          icon={<FiPlus className="text-purple-500" />}
-          label="New Project"
+          icon={<FiBell className="text-purple-500" />}
+          label="Notifications"
+          path="/worker/notifications"
+          navigate={navigate}
         />
+
         <ActionCard
-          icon={<FiSettings className="text-yellow-500" />}
-          label="Settings"
+          icon={<FiUser className="text-yellow-500" />}
+          label="Profile"
+          path="/worker/profile"
+          navigate={navigate}
         />
       </div>
     </div>
@@ -38,13 +53,20 @@ export default function QuickActions() {
 
 /* ---------------- Action Card ---------------- */
 
-const ActionCard = ({ icon, label }) => (
-  <button className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-xl hover:shadow-md hover:border-blue-300 transition-all">
+const ActionCard = ({ icon, label, path, navigate }) => (
+  <button
+    onClick={() => navigate(path)}
+    className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-xl hover:shadow-md hover:border-blue-300 transition-all"
+  >
     <div className="p-3 bg-gray-50 rounded-lg mb-2">
       {icon}
     </div>
+
     <span className="text-sm font-medium text-gray-700">
       {label}
     </span>
   </button>
 );
+
+
+

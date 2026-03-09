@@ -11,50 +11,22 @@ export default function WorkerDashboardLayout({
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="flex gap-6 p-4 md:p-6">
 
-
-
         {/* Main Content */}
-        <div className="flex-1 space-y-6">
-
-        
+        <div className="flex-1 space-y-6 w-full">
 
           {/* Status Cards */}
-          {StatusCards && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {StatusCards}
-            </div>
-          )}
+          {StatusCards && <div className="w-full">{StatusCards}</div>}
 
-         
-
-          {/* Recent Projects + Latest Messages */}
-          {(RecentProject || LatestMessages) && (
+          {/* Recent Projects + Quick Actions */}
+          {(RecentProject || QuickActions) && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              {/* Recent Projects (2 columns) */}
+              {/* Recent Projects */}
               <div className="lg:col-span-2">
                 {RecentProject}
               </div>
 
-              {/* Latest Messages (1 column) */}
-              <div>
-                {LatestMessages}
-              </div>
-
-            </div>
-          )}
-
-
-          {/* Recent Projects + Latest Messages */}
-          {(EarningsOverview || QuickActions) && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* Recent Projects (2 columns) */}
-              <div className="lg:col-span-2">
-                {EarningsOverview}
-              </div>
-
-              {/* Latest Messages (1 column) */}
+              {/* Quick Actions */}
               <div>
                 {QuickActions}
               </div>
@@ -62,14 +34,23 @@ export default function WorkerDashboardLayout({
             </div>
           )}
 
-           {/* Component Stock */}
-          {ComponentStock && (
-            <div>
-              {ComponentStock}
+          {/* Earnings Overview FULL WIDTH */}
+          {EarningsOverview && (
+            <div className="w-full">
+              {EarningsOverview}
             </div>
           )}
 
-          {/* Page Content */}
+          {/* Latest Messages */}
+          {LatestMessages && (
+            <div className="w-full">
+              {LatestMessages}
+            </div>
+          )}
+
+          {/* Component Stock */}
+          {ComponentStock && <div>{ComponentStock}</div>}
+
           {children}
 
         </div>

@@ -95,8 +95,11 @@ export const AuthProvider = ({ children }) => {
       if (role=="user"){
         navigate("/")
       }
-      else{
+      else if (role=="worker"){
         navigate("/worker/dashboard")
+      }
+      else{
+        navigate("/admin/dashboard")
       }
 
       return res.data;

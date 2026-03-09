@@ -14,18 +14,6 @@ const endpointMap = {
   cooler: "pc/cooler/",
 };
 
-// 🔥 Async thunk → fetch components by type
-// export const fetchComponents = createAsyncThunk(
-//   "components/fetchComponents",
-//   async (category, { rejectWithValue }) => {
-//     try {
-//       const res = await api.get(`/products/${endpointMap[category]}`);
-//       return { category, data: res.data };
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data || "Error fetching data");
-//     }
-//   }
-// );
 export const fetchComponents = createAsyncThunk(
   "components/fetchComponents",
   async (
@@ -79,7 +67,7 @@ const componentSlice = createSlice({
       })
 
 
-      // ✅ Success
+      //  Success
       .addCase(fetchComponents.fulfilled, (state, action) => {
         const { category, data, next, page } = action.payload;
 
@@ -96,7 +84,7 @@ const componentSlice = createSlice({
         state[category].loading = false;
       })
 
-      // ❌ Error
+      //  Error
       .addCase(fetchComponents.rejected, (state, action) => {
         const { category } = action.meta.arg || {};
         if (category && state[category]) {

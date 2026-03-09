@@ -35,6 +35,14 @@ const CartPage = () => {
   const [imageErrors, setImageErrors] = useState({});
   const navigate=useNavigate()
   const [sendBuild, setSendBuild] = useState(null);
+  const activeBuilds = cart.items.filter(
+      (build) => build.status !== "accepted"
+    );
+
+    const handleBuildClick = () => {
+      navigate("/build");
+  };
+
 
   useEffect(() => {
     fetchCart();
@@ -95,7 +103,7 @@ const CartPage = () => {
         
         {/* 🧱 Build List */}
         <div className="lg:col-span-2 space-y-4">
-          {cart.items.length === 0 ? (
+          {activeBuilds.length === 0 ? (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -104,9 +112,17 @@ const CartPage = () => {
               <Package size={48} className="mx-auto text-zinc-700 mb-4" />
               <p className="text-zinc-400 text-lg">Your cart is empty</p>
               <p className="text-zinc-600 text-sm mt-2">Start building your dream PC!</p>
+              <button className="hidden sm:block px-5 py-2 mt-5 mx-auto rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold"
+                  onClick={handleBuildClick}>
+                  Build Now
+                </button>
             </motion.div>
           ) : (
-            cart.items.map((build, index) => (
+            activeBuilds
+            .map((build, index) => {
+              const isAccepted = build.status === "accepted";
+              return(
+              
               <motion.div
                 key={build.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -115,6 +131,7 @@ const CartPage = () => {
                 className="group relative bg-zinc-900/90 border border-zinc-800 hover:border-cyan-500/50 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-cyan-500/10 backdrop-blur-sm"
                 onClick={() => setSelectedBuild(build)}
               >
+                
                 <div className="flex flex-col md:flex-row">
                   {/* Image Section */}
                   <div className="md:w-48 h-48 md:h-auto bg-zinc-800/50 relative overflow-hidden">
@@ -199,7 +216,7 @@ const CartPage = () => {
                     {/* Component Count */}
                     <div className="flex items-center gap-1 text-xs text-zinc-500 mb-3">
                       <Box size={12} />
-                      <span>{Object.keys(build.components || {}).length} components</span>
+                      <span>{Object.keys(build|| {}).length} components</span>
                     </div>
 
                     {/* Footer */}
@@ -215,26 +232,47 @@ const CartPage = () => {
                         className="flex gap-2 w-full sm:w-auto"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <button 
-                          className="flex-1 sm:flex-initial flex items-center justify-center gap-1 text-sm bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg transition-all duration-200 group/edit"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/build?edit=${build.id}`)
-                          }}
-                        >
-                          <Pencil size={14} className="group-hover/edit:text-cyan-400" />
-                        </button>
-
+                        {/* EDIT */}
                         <button
+                          disabled={isAccepted}
+                          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1 text-sm px-4 py-2 rounded-lg transition-all duration-200
+                            ${
+                              isAccepted
+                                ? "bg-zinc-800/40 text-zinc-500 cursor-not-allowed"
+                                : "bg-zinc-800 hover:bg-zinc-700 group/edit"
+                            }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            deleteBuild(build.id);
+                            if (!isAccepted) navigate(`/build?edit=${build.id}`);
                           }}
-                          className="flex-1 sm:flex-initial flex items-center justify-center gap-1 text-sm bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-4 py-2 rounded-lg transition-all duration-200 group/remove"
                         >
-                          <Trash2 size={14} className="group-hover/remove:rotate-12 transition-transform" />
+                          <Pencil
+                            size={14}
+                            className={!isAccepted ? "group-hover/edit:text-cyan-400" : ""}
+                          />
                         </button>
 
+                        {/* DELETE */}
+                        <button
+                          disabled={isAccepted}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isAccepted) deleteBuild(build.id);
+                          }}
+                          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1 text-sm px-4 py-2 rounded-lg transition-all duration-200
+                            ${
+                              isAccepted
+                                ? "bg-red-900/20 text-red-300 cursor-not-allowed"
+                                : "bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white group/remove"
+                            }`}
+                        >
+                          <Trash2
+                            size={14}
+                            className={!isAccepted ? "group-hover/remove:rotate-12 transition-transform" : ""}
+                          />
+                        </button>
+
+                        {/* VIEW (EYE) */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -249,13 +287,13 @@ const CartPage = () => {
                   </div>
                 </div>
               </motion.div>
-            ))
+            )})
           )}
         </div>
 
         {/* 📊 Build Summary */}
             <div className="lg:col-span-1">
-            <BuildSummaryPanel cart={cart} />
+            <BuildSummaryPanel cart={activeBuilds} />
             </div>
       </div>
 
