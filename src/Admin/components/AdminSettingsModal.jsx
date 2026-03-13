@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useState } from "react";
 import { X, Shield, Settings } from "lucide-react";
 import SecurityCard from "../../Customer/components/ProfileSecurityCard";
@@ -7,9 +8,8 @@ export default function SettingsModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden">
 
         {/* Header */}
@@ -24,10 +24,8 @@ export default function SettingsModal({ isOpen, onClose }) {
           </button>
         </div>
 
-
         {/* Tabs */}
         <div className="flex border-b">
-
           <button
             onClick={() => setActiveTab("security")}
             className={`flex items-center gap-2 px-6 py-3 text-sm font-medium ${
@@ -51,29 +49,20 @@ export default function SettingsModal({ isOpen, onClose }) {
             <Settings size={16} />
             Other Settings
           </button>
-
         </div>
-
 
         {/* Content */}
         <div className="p-6 min-h-[250px]">
-
-          {activeTab === "security" && (
-            <div>
-              {/* Your Change Password Component */}
-              <SecurityCard />
-            </div>
-          )}
+          {activeTab === "security" && <SecurityCard />}
 
           {activeTab === "other" && (
             <div className="flex items-center justify-center h-40 text-gray-500 text-sm">
               🚧 More settings coming soon...
             </div>
           )}
-
         </div>
-
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

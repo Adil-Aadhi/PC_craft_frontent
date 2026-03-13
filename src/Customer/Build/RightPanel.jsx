@@ -120,10 +120,16 @@ const hasIssues = incompatibleItems.length > 0;
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br from-${component?.color}-500/20 to-${component?.color}-600/20 flex items-center justify-center`}>
-                          <div className={`text-${component?.color}-400`}>
-                            {component?.icon}
-                          </div>
+                        <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center overflow-hidden">
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-contain p-1"
+                            />
+                          ) : (
+                            <Package className="w-5 h-5 text-gray-400" />
+                          )}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">

@@ -106,12 +106,12 @@ const ModalContent = ({ category, component }) => {
             </div>
           )}
 
-          <div className="aspect-video flex items-center justify-center p-8">
+          <div className="aspect-video flex items-center justify-center p-6">
             <img
               src={component.image}
               alt={component.name}
               onLoad={() => setImageLoaded(true)}
-              className={`max-h-20 object-contain transition-opacity duration-300 ${
+              className={`max-h-full max-w-full object-contain transition-opacity duration-300 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
             />

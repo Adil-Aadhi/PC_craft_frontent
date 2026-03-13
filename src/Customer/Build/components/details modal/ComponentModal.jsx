@@ -10,14 +10,20 @@ const ComponentModal = ({ componentData }) => {
     (state) => state.componentModal
   );
 
- const data = category ? componentData[category]?.items : null;
+  const build = useSelector((state) => state.build.selected);
 
-  const component = Array.isArray(data)
-    ? data.find((item) => item.id === componentId)
-    : data?.id === componentId
-    ? data
-    : null;
-  // 🔒 Lock background scroll
+  const data = category ? componentData[category]?.items : null;
+
+  let component = null;
+
+  if (Array.isArray(data)) {
+    component = data.find((item) => item.id === componentId);
+  }
+
+  if (!component) {
+    component = build?.[category] || null;
+  }
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -37,7 +43,6 @@ const ComponentModal = ({ componentData }) => {
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={() => dispatch(closeComponentModal())}
     >
-      {/* 🔥 ONLY SCROLLABLE CONTAINER */}
       <div
         className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-zinc-900 rounded-2xl shadow-2xl scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-800"
         onClick={(e) => e.stopPropagation()}

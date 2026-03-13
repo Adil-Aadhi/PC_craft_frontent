@@ -40,6 +40,21 @@ export const fetchComponents = createAsyncThunk(
     }
   }
 );
+export const fetchComponentById = createAsyncThunk(
+  "components/fetchComponentById",
+  async ({ category, id }, { rejectWithValue }) => {
+    try {
+      const res = await api.get(`/products/${endpointMap[category]}${id}/`);
+
+      return {
+        category,
+        item: res.data,
+      };
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Error fetching component");
+    }
+  }
+);
 
 const componentSlice = createSlice({
   name: "components",
@@ -91,7 +106,17 @@ const componentSlice = createSlice({
           state[category].loading = false;
         }
         state.error = action.payload;
-      });
+      })
+
+      .addCase(fetchComponentById.fulfilled, (state, action) => {
+        const { category, item } = action.payload;
+
+        const exists = state[category].items.find(i => i.id === item.id);
+
+        if (!exists) {
+          state[category].items.unshift(item); // add to top
+        }
+      })
   },
 });
 

@@ -9,7 +9,8 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaCog,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaBoxOpen 
 } from "react-icons/fa";
 import {useAuth} from "../../context/AuthContext"
 import { useState } from "react";
@@ -29,10 +30,11 @@ export default function AdminSidebar({sidebarExpanded,
   const menu = [
     { name: "Dashboard", icon: <FaTachometerAlt />, path: "/admin/dashboard" },
     { name: "Users", icon: <FaUsers />, path: "/admin/users" },
-    { name: "Workers", icon: <FaUserCog />, path: "/admin/workers" },
-    { name: "Completions", icon: <FaCreditCard />, path: "/admin/completions" },
+    { name: "Worker Verification", icon: <FaUserCog />, path: "/admin/workers" },
+    { name: "Order Completions", icon: <FaCreditCard />, path: "/admin/completions" },
     { name: "Orders", icon: <FaShoppingCart />, path: "/admin/orders" },
     { name: "Revenue", icon: <FaChartLine />, path: "/admin/revenue" },
+    { name: "Products", icon: <FaBoxOpen  />, path: "/admin/products" },
   ];
 
   const bottomMenu = [

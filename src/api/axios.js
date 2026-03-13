@@ -18,9 +18,9 @@ const processQueue = (error, token = null) => {
 const api = axios.create({
   baseURL: "http://localhost/api/", 
   // baseURL: "http://127.0.0.1:8000/api/", 
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // headers: {
+  //   "Content-Type": "application/json",
+  // },
   withCredentials: true,
 });
 
@@ -28,6 +28,13 @@ const refreshApi = axios.create({
   baseURL: "http://localhost/api/",
   // baseURL: "http://127.0.0.1:8000/api/",
   withCredentials: true,
+});
+
+const aiApi = axios.create({
+  baseURL: "http://localhost/ai/",
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 /* ============================
@@ -52,6 +59,19 @@ api.interceptors.request.use(
 
     // ✅ Attach token ONLY for protected routes
     if (accessToken && !isPublicEndpoint(config.url)) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+aiApi.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
@@ -129,5 +149,5 @@ api.interceptors.response.use(
   }
 );
 
-
+export { aiApi };
 export default api;

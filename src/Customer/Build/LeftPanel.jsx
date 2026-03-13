@@ -39,7 +39,42 @@ const LeftPanel = ({
   const { checkCompatibility } = useCompatibility();
   const dispatch = useDispatch();
 
-  const items = componentData[activeCategory]?.items || [];
+  const rawItems = Array.isArray(componentData[activeCategory]?.items)
+                  ? componentData[activeCategory].items
+                  : [];
+
+  const selectedItem = build[activeCategory];
+
+    let items = Array.from(
+      new Map(rawItems.map(item => [item.id, item])).values()
+    );
+
+    if (selectedItem) {
+
+    const exists = items.find(i => i.id === selectedItem.id)
+
+    if (!exists) {
+
+      // ensure injected item has safe structure
+      const safeItem = {
+        ...selectedItem,
+        price: selectedItem.price ?? 0,
+        description: selectedItem.description ?? "",
+        benchmark: selectedItem.benchmark ?? null,
+        wattage: selectedItem.wattage ?? null
+      }
+
+      items = [safeItem, ...items]
+
+    } else {
+
+      items = [
+        exists,
+        ...items.filter(i => i.id !== selectedItem.id)
+      ]
+
+    }
+  }
   const next = componentData[activeCategory]?.next;
 
   return (
@@ -199,13 +234,28 @@ const LeftPanel = ({
                                 {/* LEFT SIDE → KEEP YOUR ORIGINAL CONTENT */}
                                 <div className="flex-1">
                                   <div className="flex items-center gap-3 mb-2">
-                                    <div
-                                      className={`p-2 rounded-lg ${
-                                        selected ? "bg-cyan-500/20" : "bg-gray-700/50"
-                                      }`}
-                                    >
-                                      {ComponentIcon}
-                                    </div>
+                                   <div
+                                        className={`p-2 rounded-lg flex items-center justify-center ${
+                                          selected ? "bg-cyan-500/20" : "bg-gray-700/50"
+                                        }`}
+                                      >
+                                        {item.image ? (
+                                          <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-6 h-6 object-contain"
+                                            onError={(e) => {
+                                              e.target.style.display = "none";
+                                              e.target.nextSibling.style.display = "block";
+                                            }}
+                                          />
+                                        ) : null}
+
+                                        {/* Fallback Icon */}
+                                        <span style={{ display: item.image ? "none" : "block" }}>
+                                          {ComponentIcon}
+                                        </span>
+                                      </div>
                                     <div>
                                       <div className="font-medium text-white">{item.name}</div>
                                       {item.description && (

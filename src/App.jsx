@@ -36,6 +36,7 @@ import NotFound from './pages/NotFound'
 import { AdminStatsProvider } from './Admin/context/AdminStatsContext'
 import AdminOrders from './Admin/pages/AdminOrderPage'
 import WorkerRevenuePage from './Worker/pages/WorkerRevenuePage'
+import Products from './Admin/pages/AdminProducts'
 
 function App() {
 
@@ -167,9 +168,9 @@ function App() {
 
               <Route path="/admin/orders" element={<AdminOrders />} />
 
-              {/* <Route path="/admin/payments" element={<AdminPayments />} /> */}
-
               <Route path="/admin/revenue" element={<AdminRevenue />} />
+
+               <Route path="/admin/products" element={<Products />} />
 
             </Route>
 
