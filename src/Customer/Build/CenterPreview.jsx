@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useCompatibility } from "./hooks/useCompatibility";
 import React from "react";
+import PCScene from "./components/3dModal/PCScene";
 
 const CenterPreview = ({ build = {} }) => {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
@@ -110,6 +111,7 @@ const CenterPreview = ({ build = {} }) => {
       </div>
 
       {/* PREVIEW */}
+
       <div className="relative h-[500px] flex items-center justify-center">
         <motion.div
           className="w-full h-full flex items-center justify-center"
@@ -132,7 +134,7 @@ const CenterPreview = ({ build = {} }) => {
                   isBad = compatibility === "bad";
                 }
 
-                /* size hierarchy */
+                
                 let sizeClass = "w-14 h-14";
                 if (key === "motherboard") sizeClass = "w-64 h-44";
                 if (key === "case") sizeClass = "w-72 h-52 opacity-30";
@@ -142,7 +144,7 @@ const CenterPreview = ({ build = {} }) => {
                 if (key === "storage") sizeClass = "w-12 h-8";
                 if (key === "casefan") sizeClass = "w-10 h-10";
 
-                /* z-index layering */
+                
                 let baseZ = "z-20";
                 if (key === "motherboard") baseZ = "z-10";
                 if (key === "case") baseZ = "z-0";
@@ -175,10 +177,10 @@ const CenterPreview = ({ build = {} }) => {
                         : { scale: 1.08 }
                     }
                   >
-                    {/* hide icon for background layers */}
+                   
                     {key !== "motherboard" && key !== "case" && pos.icon}
 
-                    {/* label */}
+                    
                     {showLabels && hasComponent && (
                       <div
                         className={`pointer-events-none absolute -bottom-6 text-xs px-2 py-1 rounded ${
@@ -195,6 +197,7 @@ const CenterPreview = ({ build = {} }) => {
           </motion.div>
         </motion.div>
       </div>
+
 
       {/* STATS */}
       {showStats && (

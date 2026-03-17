@@ -17,6 +17,7 @@ import { useSearchParams } from "react-router-dom";
 import { useRef } from "react";
 import { Bot } from "lucide-react";
 import AiAssistantModal from "./components/Ai_assistant_modal";
+import PCScene from "./components/3dModal/PCScene";
 
 const BuildPC = () => {
 
@@ -347,8 +348,11 @@ const BuildPC = () => {
         </div>
 
         {/* CENTER */}
-        <div className="col-span-6 bg-gray-900/70 rounded-2xl border border-cyan-500/10">
+        {/* <div className="col-span-6 bg-gray-900/70 rounded-2xl border border-cyan-500/10">
           <CenterPreview build={build} />
+        </div> */}
+        <div className="col-span-6 bg-gray-900/70 rounded-2xl border border-cyan-500/10">
+          <PCScene  build={build}/>
         </div>
 
         {/* RIGHT */}
