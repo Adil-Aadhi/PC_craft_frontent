@@ -42,10 +42,11 @@ export const useCompatibility = () => {
 
     // PSU ↔ GPU
     if (category === "psu" && build.gpu) {
-      if (item.wattage < build.gpu.recommended_wattage) {
+      if (item.wattage < build.gpu.recommended_psu_watt) {
         compatibility = "bad";
-        message = `GPU needs ${build.gpu.recommended_wattage}W PSU`;
+        message = `GPU needs ${build.gpu.recommended_psu_watt}W PSU`;
       }
+     
     }
 
     if (category === "gpu" && build.psu) {

@@ -54,7 +54,7 @@ const ModalContent = ({ category, component }) => {
     cat.charAt(0).toUpperCase() + cat.slice(1);
 
   return (
-    <div className="relative">
+    <div className="relativez-[1000]">
 
       {/* Close Button */}
       <button

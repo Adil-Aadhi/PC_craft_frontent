@@ -10,15 +10,15 @@ import { openComponentModal } from "./redux/components/componentModalSlice";
 import { EyeIcon } from "lucide-react";
 
 const components = [
-  { key: "cpu", label: "Processor", icon: <Cpu size={18} />, color: "from-cyan-500 to-blue-500" },
+  { key: "case", label: "Case", icon: <Box size={18} />, color: "from-gray-500 to-slate-500" },
   { key: "motherboard", label: "Motherboard", icon: <CircuitBoard  size={18} />, color: "from-indigo-500 to-blue-500" },
+  { key: "cpu", label: "Processor", icon: <Cpu size={18} />, color: "from-cyan-500 to-blue-500" },
   { key: "ram", label: "Memory", icon: <MemoryStick size={18} />, color: "from-emerald-500 to-green-500" },
   { key: "storage", label: "Storage", icon: <HardDrive size={18} />, color: "from-purple-500 to-pink-500" },
   { key: "gpu", label: "Graphics", icon: <Monitor size={18} />, color: "from-orange-500 to-red-500" },
-  { key: "psu", label: "Power Supply", icon: <Power size={18} />, color: "from-yellow-500 to-amber-500" },
-  { key: "case", label: "Case", icon: <Box size={18} />, color: "from-gray-500 to-slate-500" },
-  { key: "casefan", label: "Case Fan", icon: <Fan  size={18} className="animate-spin-slow" />, color: "from-purple-500 via-pink-500 to-cyan-500" },
   { key: "cooler", label: "Cooler", icon: <Snowflake  size={18} />, color: "from-blue-900 to-cyan-400" },
+  { key: "casefan", label: "Case Fan", icon: <Fan  size={18} className="animate-spin-slow" />, color: "from-purple-500 via-pink-500 to-cyan-500" },
+  { key: "psu", label: "Power Supply", icon: <Power size={18} />, color: "from-yellow-500 to-amber-500" },
 ];
 
 const LeftPanel = ({

@@ -1,7 +1,10 @@
 import { useGLTF } from "@react-three/drei";
 import { useEffect } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { useRef } from "react";
 
-export default function CpuModel({motherboard,cpu}) {
+export default function CpuModel({motherboard,cpu,isCompatible = true}) {
 
     const cpuModals={
     AMD:"/models/cpu ryzen.glb",
@@ -22,6 +25,7 @@ export default function CpuModel({motherboard,cpu}) {
   };
 
   const modelpath=cpuModals[cpu] || cpuModals["AMD"]
+  const cpuMeshes = useRef([]);
 
   const { scene } = useGLTF(modelpath);
 
@@ -29,13 +33,16 @@ export default function CpuModel({motherboard,cpu}) {
   const config = cpuConfigs[motherboard] || cpuConfigs.asus;
 
   useEffect(() => {
-    scene.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
-  }, [scene]);
+  scene.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      // 🔥 IMPORTANT: mark as external component
+      child.userData.isChildComponent = true;
+    }
+  });
+}, [scene]);
 
   return (
     <primitive

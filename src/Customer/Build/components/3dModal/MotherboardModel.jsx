@@ -4,8 +4,11 @@ import RamModel from "./RamModal";
 import SSDModel from "./SSDModel";
 import GpuModel from "./GPUModal";
 import CpuModel from "./CpuModal";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { useRef } from "react";
 
-export default function Motherboard({build}) {
+export default function Motherboard({build , isCompatible = true,ramCompatible,gpuCompatible ,cpuCompatible}) {
   const brand = build?.motherboard?.brand?.toLowerCase() || "asus";
 
    const motherboardConfigs = {
@@ -26,16 +29,55 @@ export default function Motherboard({build}) {
   const config = motherboardConfigs[brand] || motherboardConfigs.asus;
 
   const { scene } = useGLTF(config.path);
+  const boardMeshes = useRef([]);
   
 
-  useEffect(() => {
-    scene.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
-  }, [scene]);
+useEffect(() => {
+  if (!scene) return;
+
+  boardMeshes.current = [];
+
+  scene.traverse((child) => {
+    if (child.isMesh && child.material) {
+
+      // ✅ ONLY meshes that belong to loaded GLB
+      if (child.userData.isChildComponent) return;
+
+      boardMeshes.current.push(child);
+
+      child.material = child.material.clone();
+      child.material.emissive = new THREE.Color("black");
+      child.material.emissiveIntensity = 0;
+    }
+  });
+
+}, [scene]);
+
+
+
+  useFrame(({ clock }) => {
+  if (!scene) return;
+
+  const t = clock.getElapsedTime();
+
+  boardMeshes.current.forEach((child) => {
+
+    // 🔴 Not compatible → pulse
+    if (!isCompatible) {
+      const pulse = 0.6 + Math.sin(t * 3) * 0.4;
+
+      child.material.emissive = new THREE.Color("#ff0000");
+      child.material.emissiveIntensity = pulse;
+      child.material.toneMapped = false;
+      return;
+    }
+
+    // ✅ Normal
+    child.material.emissive = new THREE.Color("black");
+    child.material.emissiveIntensity = 0;
+    child.material.toneMapped = true;
+  });
+});
 
   return (
   <primitive
@@ -45,10 +87,10 @@ export default function Motherboard({build}) {
     rotation={config.rotation}
   >
     {/* <RamModel/> */}
-    {build?.cpu && <CpuModel motherboard={brand} cpu={build.cpu.brand}/>}
-    {build?.ram && <RamModel motherboard={brand}/>}
+    {build?.cpu && <CpuModel motherboard={brand} cpu={build.cpu.brand} isCompatible={cpuCompatible}/>}
+    {build?.ram && <RamModel motherboard={brand} isCompatible={ramCompatible}/>}
     {build?.storage && <SSDModel motherboard={brand} brand={build.storage.brand}/>}
-    {build?.gpu && <GpuModel brand={build.gpu.brand} motherboard={brand}/>}
+    {build?.gpu && <GpuModel brand={build.gpu.brand} motherboard={brand} isCompatible={gpuCompatible} />}
   </primitive>
 );
 }

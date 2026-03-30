@@ -26,7 +26,7 @@ const BuildPC = () => {
   const [pendingNavigation, setPendingNavigation] = useState(null);
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("edit");
-  const [activeCategory, setActiveCategory] = useState("cpu");
+  const [activeCategory, setActiveCategory] = useState("case");
   const dispatch = useDispatch();
   const build = useSelector((state) => state.build.selected);
   const componentsState = useSelector((state) => state.components);

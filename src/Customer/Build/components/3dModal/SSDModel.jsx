@@ -1,4 +1,5 @@
 import { useGLTF, useTexture } from "@react-three/drei";
+import { useEffect } from "react";
 
 export default function SSDModel({motherboard,brand}) {
 
@@ -25,6 +26,15 @@ export default function SSDModel({motherboard,brand}) {
   const { scene } = useGLTF(modelPath);
 
   const config = ssdConfigs[motherboard] || ssdConfigs.asus;
+
+  useEffect(() => {
+  scene.traverse((child) => {
+    if (child.isMesh) {
+      // 🔥 mark as child component
+      child.userData.isChildComponent = true;
+    }
+  });
+}, [scene]);
 
   return (
     <group
