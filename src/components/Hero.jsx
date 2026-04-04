@@ -130,7 +130,7 @@ export default function Hero() {
       setActiveSection(current.section);
       setTextSide(current.textSide);
 
-      if (v >= 0.92) {
+      if (v >= 0.8) {
         // start 5s timer only once
         if (!ctaTimerRef.current) {
           ctaTimerRef.current = setTimeout(() => {

@@ -73,7 +73,7 @@ function CanvasLoader() {
 }
 
 export default function PCScene({ build }) {
-  const [showGlass, setShowGlass] = useState(true);
+  const [showGlass, setShowGlass] = useState(false);
   const [rgbEnabled, setRgbEnabled] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);  // controls overlay visibility
