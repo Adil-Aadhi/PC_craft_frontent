@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+
 const SECTIONS = [
   {
     badge: "Premium Custom PC Builder",
@@ -36,23 +37,27 @@ const TIMELINE = [
   { progress: 0.75, section: 3, textSide: "left" },
 ];
 
-function TextPanel({ section, side }) {
+
+
+function TextPanel({ section, side , isMobile }) {
+  
+  
   const isRight = side === "right";
-  const initialX = isRight ? 80 : -80;
+  const initialX = isMobile ? 0 : (isRight ? 80 : -80);
 
   return (
     <motion.div
       key={section.heading}
-      initial={{ opacity: 0, x: initialX, filter: "blur(10px)" }}
-      animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: isMobile ? 40 : 0, x: isMobile ? 0 : initialX, filter: isMobile ? "blur(0px)" : "blur(10px)" }}
+      animate={{ opacity: 1, y: 0, x: 0, filter: "blur(0px)" }}
       exit={{ opacity: 0, x: -initialX, filter: "blur(10px)" }}
       transition={{ duration: 0.7 }}
-      className={`absolute top-0 h-full flex flex-col justify-center px-16 w-[45%]
-      ${isRight ? "right-0" : "left-0"}`}
+      className={`absolute top-0 h-full flex flex-col justify-center items-center text-center px-6
+      ${isMobile ? "w-full left-0" : "w-[45%] " + (isRight ? "right-0" : "left-0")}`}
     >
       <div className="text-cyan-400 text-sm mb-4">{section.badge}</div>
-      <h1 className="text-5xl font-bold leading-tight">{section.heading}</h1>
-      <p className="mt-4 text-gray-400 max-w-md">{section.body}</p>
+      <h1 className={`${isMobile ? "text-2xl" : "text-5xl"} font-bold leading-tight`}>{section.heading}</h1>
+      <p className={`mt-4 text-gray-400 ${isMobile ? "text-sm max-w-xs" : "max-w-md"}`}>{section.body}</p>
     </motion.div>
   );
 }
@@ -119,6 +124,19 @@ export default function Hero() {
   const trackFillWidth  = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   const counterOpacity  = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
   const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+  
 
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (v) => {
@@ -293,7 +311,8 @@ export default function Hero() {
           </div>
 
           {/* ── GLASSMORPHIC PANEL — frosted blur behind text ── */}
-          <AnimatePresence>
+          {!isMobile && (
+            <AnimatePresence>
           {!hideText && (
           <motion.div
             animate={{
@@ -323,6 +342,8 @@ export default function Hero() {
           />
           )}
           </AnimatePresence>
+          )}
+          
 
           {/* ── TEXT ── */}
           <AnimatePresence>
@@ -336,7 +357,7 @@ export default function Hero() {
                 style={{ zIndex: 10 }}
               >
                 <AnimatePresence mode="wait">
-                  <TextPanel section={section} side={textSide} />
+                  <TextPanel section={section} side={textSide} isMobile={isMobile}/>
                 </AnimatePresence>
               </motion.div>
             )}
@@ -354,7 +375,7 @@ export default function Hero() {
                 style={{
                   position: "absolute",
                   bottom: "10%",
-                  left: "45%",
+                  left: isMobile? "30%":"45%",
                   transform: "translateX(-50%)",
                   zIndex: 20,
                 }}
@@ -371,13 +392,13 @@ export default function Hero() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "10px",
-                      padding: "14px 40px",
+                      gap: isMobile ? "6px" : "10px",
+                      padding: isMobile ? "10px 22px" : "14px 40px",
                       borderRadius: "999px",
                       border: "none",
                       background: "#05080f",
                       color: "#ffffff",
-                      fontSize: "16px",
+                      fontSize: isMobile ? "13px" : "16px",
                       fontWeight: "600",
                       letterSpacing: "0.04em",
                       cursor: "pointer",
@@ -421,7 +442,7 @@ export default function Hero() {
                 style={{
                   position: "absolute",
                   bottom: "28px",
-                  left: "50%",
+                  left:isMobile? "35%": "50%",
                   transform: "translateX(-50%)",
                   zIndex: 20,
                   display: "flex",

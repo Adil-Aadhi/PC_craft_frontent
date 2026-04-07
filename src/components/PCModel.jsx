@@ -3,9 +3,102 @@ import { Environment, useGLTF } from "@react-three/drei";
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { Html, useProgress } from "@react-three/drei";
 
 const lerp = (a, b, t) => a + (b - a) * t;
 
+function Loader() {
+  const { progress } = useProgress();
+
+  return (
+    <Html center>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px 40px",
+        borderRadius: "20px",
+        background: "rgba(255, 255, 255, 0.07)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(255, 255, 255, 0.12)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+        minWidth: "200px",
+      }}>
+
+        {/* Icon / Spinner ring */}
+        <div style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          border: "2px solid rgba(255,255,255,0.08)",
+          borderTop: "2px solid #22d3ee",
+          borderRight: "2px solid #34d399",
+          animation: "spin 1s linear infinite",
+          marginBottom: "20px",
+        }} />
+
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+          }
+        `}</style>
+
+        {/* Title */}
+        <p style={{
+          fontSize: "13px",
+          fontFamily: "Inter, sans-serif",
+          fontWeight: 500,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.5)",
+          margin: "0 0 16px 0",
+        }}>
+          Loading Scene
+        </p>
+
+        {/* Progress bar */}
+        <div style={{
+          width: "160px",
+          height: "3px",
+          background: "rgba(255,255,255,0.08)",
+          borderRadius: "999px",
+          overflow: "hidden",
+          marginBottom: "10px",
+        }}>
+          <div style={{
+            width: `${progress}%`,
+            height: "100%",
+            borderRadius: "999px",
+            background: "linear-gradient(90deg, #22d3ee, #34d399, #22d3ee)",
+            backgroundSize: "200% auto",
+            animation: "shimmer 1.5s linear infinite",
+            transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+            boxShadow: "0 0 8px rgba(34, 211, 238, 0.6)",
+          }} />
+        </div>
+
+        {/* Percentage */}
+        <p style={{
+          fontSize: "12px",
+          fontFamily: "Inter, sans-serif",
+          fontWeight: 600,
+          color: "rgba(255,255,255,0.3)",
+          margin: 0,
+          letterSpacing: "0.05em",
+        }}>
+          {progress.toFixed(0)}%
+        </p>
+
+      </div>
+    </Html>
+  );
+}
 function Exposure() {
   const { gl } = useThree();
   useEffect(() => {
@@ -15,7 +108,7 @@ function Exposure() {
 }
 
 /* ================= MODEL ================= */
-function Model({ scrollProgress }) {
+function Model({ scrollProgress , isMobile}) {
   const { scene: caseScene } = useGLTF("/models/new_pc_main.glb");
   const { scene: coolerScene } = useGLTF("/models/new_pc_cooler.glb");
   const { scene: fanScene } = useGLTF("/models/new_pc_fan.glb");
@@ -25,6 +118,7 @@ function Model({ scrollProgress }) {
   const caseFans = useRef([]);
   const coolerRGB = useRef([]);
   const caseRGB = useRef([]);
+  
 
   function centerModel(model) {
     const box = new THREE.Box3().setFromObject(model);
@@ -75,13 +169,23 @@ function Model({ scrollProgress }) {
     });
   }, [caseScene, coolerScene, fanScene]);
 
-  const keyframes = [
+  const desktopKeyframes = [
     { progress: 0.0,  rotY: 0.4,  posX: 28,  posY: -14, posZ: 4 },
     { progress: 0.25, rotY: 0.1,  posX: -10, posY: -14, posZ: 6 },
     { progress: 0.5,  rotY: -0.5, posX: 31,  posY: -19, posZ: 5 },
     { progress: 0.75, rotY: 1.5,  posX: 10,  posY: -18, posZ: 2 },
     { progress: 1.0,  rotY: 0.4,  posX: 26,  posY: -20, posZ: 0 },
   ];
+
+  const mobileKeyframes = [
+      { progress: 0.0,  rotY: 0.4,  posX: 15,   posY: -12, posZ: 6  },
+      { progress: 0.25, rotY: -1,  posX: -5,   posY: -12, posZ: 8  },  // less posZ swing
+      { progress: 0.5,  rotY: -0.2, posX: 19,   posY: -21, posZ: 6  },  // was 16.5 posX → pulled in, rotY flattened
+      { progress: 0.75, rotY: -0.1, posX: 17,    posY: -12,  posZ: 7  },  // was posY -3 too high, posX 9→7
+      { progress: 1.0,  rotY: 0.5,  posX: 15,   posY: -18, posZ: 4  },  // softened final posY drop
+    ];
+
+  const keyframes = isMobile ? mobileKeyframes : desktopKeyframes;
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
@@ -163,7 +267,7 @@ function Model({ scrollProgress }) {
   });
 
   return (
-    <group ref={groupRef} scale={0.12}>
+    <group ref={groupRef} scale={isMobile ? 0.08 : 0.12}>
       <primitive object={caseScene} dispose={null} />
       <primitive object={coolerScene} dispose={null} />
       <primitive object={fanScene} dispose={null} />
@@ -172,16 +276,26 @@ function Model({ scrollProgress }) {
 }
 
 /* ================= CAMERA ================= */
-function CameraRig({ scrollProgress }) {
+function CameraRig({ scrollProgress ,isMobile={isMobile}}) {
   const { camera } = useThree();
+  const initialized = useRef(false);
 
-  const camKeyframes = [
+  const DesktopcamKeyframes = [
     { progress: 0.0,  x: 0,   y: -2,  z: 48 },
     { progress: 0.25, x: 0,   y: 6,   z: 48 },
     { progress: 0.5,  x: 3,   y: -9,  z: 8  },
     { progress: 0.75, x: -20, y: 20,  z: 16 },
     { progress: 1.0,  x: 0,   y: -10, z: 50 },
   ];
+  const mobileCamKeyframes = [
+    { progress: 0.0,  x: 0,  y: -2, z: 55 },
+    { progress: 0.25, x: 1,  y: 4,  z: 33 },
+    { progress: 0.5,  x: 3,  y: 5, z: 6 },  // reduced x drift, gentler z
+    { progress: 0.75, x: -2, y: 3,  z: 49 },  // was -4/6, pulled in close to center
+    { progress: 1.0,  x: 0,  y: -4, z: 55 },  // eased final y
+  ];
+
+  const camKeyframes= isMobile? mobileCamKeyframes:DesktopcamKeyframes
 
   const modelKeyframes = [
     { progress: 0.0,  x: 10,  y: -8,   z: 2 },
@@ -208,15 +322,25 @@ function CameraRig({ scrollProgress }) {
       }
     }
 
-    // ✅ Fix — clamp t, prevent NaN at exact keyframe boundaries
     const rawT = next.progress === prev.progress
       ? 0
       : (sp - prev.progress) / (next.progress - prev.progress);
     const t = Math.max(0, Math.min(1, rawT));
 
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, lerp(prev.x, next.x, t), 2.5, delta);
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, lerp(prev.y, next.y, t), 2.5, delta);
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, lerp(prev.z, next.z, t), 2.5, delta);
+    const targetX = lerp(prev.x, next.x, t);
+    const targetY = lerp(prev.y, next.y, t);
+    const targetZ = lerp(prev.z, next.z, t);
+
+    if (!initialized.current) {
+      // Snap instantly — no damp on first frame
+      camera.position.set(targetX, targetY, targetZ);
+      initialized.current = true;
+    } else {
+      camera.position.x = THREE.MathUtils.damp(camera.position.x, targetX, 2.5, delta);
+      camera.position.y = THREE.MathUtils.damp(camera.position.y, targetY, 2.5, delta);
+      camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, 2.5, delta);
+    }
+
     camera.lookAt(lerp(mPrev.x, mNext.x, t), lerp(mPrev.y, mNext.y, t), lerp(mPrev.z, mNext.z, t));
   });
 
@@ -224,7 +348,7 @@ function CameraRig({ scrollProgress }) {
 }
 
 /* ================= NEON TEXT OVERLAY ================= */
-function NeonOverlay({ scrollProgress }) {
+function NeonOverlay({ scrollProgress ,isMobile }) {
   const [phase, setPhase] = useState(0);
   const rafRef = useRef();
 
@@ -291,8 +415,8 @@ function NeonOverlay({ scrollProgress }) {
       <div
         style={{
           position: "absolute",
-          top: "50%",
-          left: "32%",
+          top: isMobile ? "20%" : "50%",
+          left: isMobile ? "50%" : "32%",
           transform: "translate(-50%, -50%)",
           display: "flex",
           flexDirection: "column",
@@ -300,12 +424,12 @@ function NeonOverlay({ scrollProgress }) {
           pointerEvents: "none",
           opacity: phase === 1 ? 1 : 0,
           transition: "opacity 0.8s ease",
-          zIndex: 0,
+          zIndex: isMobile ? 10 : 0,
         }}
       >
         <span
           style={{
-            fontSize: "11px",
+            fontSize: isMobile ? "8px" : "11px",
             letterSpacing: "0.35em",
             textTransform: "uppercase",
             color: "rgba(34,211,238,0.5)",
@@ -316,12 +440,12 @@ function NeonOverlay({ scrollProgress }) {
           Engineered for dominance
         </span>
 
-        <NeonTitle />
+        <NeonTitle isMobile={isMobile} />
 
         <span
           style={{
             marginTop: "14px",
-            fontSize: "13px",
+            fontSize: isMobile ? "9px" : "14px",
             letterSpacing: "0.12em",
             color: "rgba(180,255,240,0.45)",
             fontFamily: "'Inter', sans-serif",
@@ -336,11 +460,11 @@ function NeonOverlay({ scrollProgress }) {
 }
 
 /* ── PC CRAFT SVG neon sign ── */
-function NeonTitle() {
+function NeonTitle({isMobile}) {
   return (
     <svg
       viewBox="0 0 520 90"
-      width="460"
+      width={isMobile ? 260 : 460}
       style={{ overflow: "visible", maxWidth: "90vw" }}
     >
       <defs>
@@ -364,7 +488,7 @@ function NeonTitle() {
           }
           .neon-main {
             font-family: 'Orbitron', 'Courier New', monospace;
-            font-size: 72px;
+            font-size: ${isMobile ? "60px" : "72px"};
             font-weight: 900;
             letter-spacing: 0.08em;
             fill: #e0ffff;
@@ -387,6 +511,14 @@ function NeonTitle() {
 
 /* ================= MAIN EXPORT ================= */
 export default function PCModel({ scrollProgress }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       {/* 3D Canvas */}
@@ -419,14 +551,14 @@ export default function PCModel({ scrollProgress }) {
         <Environment preset="city" />
         <Exposure />
 
-        <Suspense fallback={null}>
-          <Model scrollProgress={scrollProgress} />
-          <CameraRig scrollProgress={scrollProgress} />
+        <Suspense fallback={<Loader />}>
+          <Model scrollProgress={scrollProgress} isMobile={isMobile} />
+          <CameraRig scrollProgress={scrollProgress} isMobile={isMobile}/>
         </Suspense>
       </Canvas>
 
       {/* DOM overlay — neon brand + helper + CTA */}
-      <NeonOverlay scrollProgress={scrollProgress} />
+      <NeonOverlay scrollProgress={scrollProgress}  isMobile={isMobile}/>
     </div>
   );
 }
