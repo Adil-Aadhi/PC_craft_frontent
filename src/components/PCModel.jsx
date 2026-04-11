@@ -131,7 +131,7 @@ function Model({ scrollProgress , isMobile}) {
     centerModel(coolerScene);
     centerModel(fanScene);
 
-    coolerScene.position.set(10, 2, 0);
+    coolerScene.position.set(2, 2, 0);
     fanScene.position.set(0, 0, -2);
 
     coolerScene.traverse((child) => {

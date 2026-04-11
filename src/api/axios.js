@@ -16,7 +16,8 @@ const processQueue = (error, token = null) => {
    API INSTANCES
 ============================ */
 const api = axios.create({
-  baseURL: "http://localhost/api/", 
+  baseURL: "https://pccraft3d.duckdns.org/api/", 
+  // baseURL: "http://localhost/api/", 
   // baseURL: "http://127.0.0.1:8000/api/", 
   // headers: {
   //   "Content-Type": "application/json",
@@ -25,13 +26,15 @@ const api = axios.create({
 });
 
 const refreshApi = axios.create({
-  baseURL: "http://localhost/api/",
+  baseURL: "https://pccraft3d.duckdns.org/api/",
+  // baseURL: "http://localhost/api/",
   // baseURL: "http://127.0.0.1:8000/api/",
   withCredentials: true,
 });
 
 const aiApi = axios.create({
-  baseURL: "http://localhost/ai/",
+  baseURL: "https://pccraft3d.duckdns.org/ai/",
+  // baseURL: "http://localhost/ai/",
   headers: {
     "Content-Type": "application/json",
   },
