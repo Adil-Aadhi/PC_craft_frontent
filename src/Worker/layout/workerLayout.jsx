@@ -1,18 +1,18 @@
 import { Outlet, useLocation } from "react-router-dom";
 import WorkerSidebar from "../components/WorkerSidebar";
-import WorkerNavbar from "../components/WorkerNavbar";
+import WorkerNavbar from "../components/workerNavbar";
 
 export default function WorkerLayout() {
   const location = useLocation();
 
   // adjust path according to your route
   const hideSidebar = location.pathname.includes("/profile") ||
-                      location.pathname.includes("/kyc/page") ||
-                      location.pathname.includes("/worker/notifications") ||
-                      location.pathname.includes("/worker/chat")
+    location.pathname.includes("/kyc/page") ||
+    location.pathname.includes("/worker/notifications") ||
+    location.pathname.includes("/worker/chat")
 
   const hideNavbar =
-    location.pathname.includes("/kyc/page")||
+    location.pathname.includes("/kyc/page") ||
     location.pathname.includes("/worker/chat")
 
   return (

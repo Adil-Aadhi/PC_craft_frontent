@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, Mail, Briefcase, Clock, DollarSign,ChevronRight,Eye,Users} from "lucide-react";
 import api from "../../api/axios";
-import { WorkerKYCModalVerification } from "../components/AdminKycVerificationMOdal";
+import { WorkerKYCModalVerification } from "../components/AdminKycVerificationModal";
 
 export default function WorkerVerification() {
   const [workers, setWorkers] = useState([]);
