@@ -146,6 +146,11 @@ function Model({ scrollProgress, isMobile }) {
           caseFans.current.push(pivot);
           rgbMeshes.current.push(child);
         }
+        scene.traverse((child) => {
+    if (child.isMesh) {
+      child.geometry.dispose();  // frees RAM, GPU keeps its copy
+    }
+  });
       }
     });
   }, [scene]);
@@ -457,6 +462,7 @@ export default function PCModel({ scrollProgress }) {
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       <Canvas
+        performance={{ min: 0.5 }}
         dpr={isMobile ? 1 : [1, 2]}            // ✅ Mobile locked to DPR 1
         gl={{
           antialias: !isMobile,                 // ✅ Disable antialias on mobile
@@ -517,3 +523,4 @@ export default function PCModel({ scrollProgress }) {
     </div>
   );
 }
+useGLTF.preload("/models/pc_combined.glb");
