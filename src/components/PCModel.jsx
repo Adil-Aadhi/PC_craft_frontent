@@ -477,6 +477,8 @@ export default function PCModel({ scrollProgress }) {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  if (isMobile === null) return null;
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       {/* 3D Canvas */}
@@ -487,7 +489,7 @@ export default function PCModel({ scrollProgress }) {
           powerPreference: "high-performance",
           toneMapping: THREE.ACESFilmicToneMapping,
         }}
-        camera={{ position: [0, 6, 50], fov: 38 }}
+        camera={{ position: [0, -2, 48], fov: 38 }}
         style={{ height: "100%", width: "100%", position: "relative", zIndex: 1 }}
       >
         <EffectComposer>
