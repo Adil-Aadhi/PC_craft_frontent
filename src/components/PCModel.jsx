@@ -26,8 +26,6 @@ function Loader() {
         boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
         minWidth: "200px",
       }}>
-
-        {/* Icon / Spinner ring */}
         <div style={{
           width: "48px",
           height: "48px",
@@ -38,18 +36,13 @@ function Loader() {
           animation: "spin 1s linear infinite",
           marginBottom: "20px",
         }} />
-
         <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
+          @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes shimmer {
             0% { background-position: -200% center; }
             100% { background-position: 200% center; }
           }
         `}</style>
-
-        {/* Title */}
         <p style={{
           fontSize: "13px",
           fontFamily: "Inter, sans-serif",
@@ -61,8 +54,6 @@ function Loader() {
         }}>
           Loading Scene
         </p>
-
-        {/* Progress bar */}
         <div style={{
           width: "160px",
           height: "3px",
@@ -82,8 +73,6 @@ function Loader() {
             boxShadow: "0 0 8px rgba(34, 211, 238, 0.6)",
           }} />
         </div>
-
-        {/* Percentage */}
         <p style={{
           fontSize: "12px",
           fontFamily: "Inter, sans-serif",
@@ -94,11 +83,11 @@ function Loader() {
         }}>
           {progress.toFixed(0)}%
         </p>
-
       </div>
     </Html>
   );
 }
+
 function Exposure() {
   const { gl } = useThree();
   useEffect(() => {
@@ -109,12 +98,13 @@ function Exposure() {
 
 /* ================= MODEL ================= */
 function Model({ scrollProgress, isMobile }) {
-  const { scene } = useGLTF("/models/pc_combined.glb"); // your new merged file
+  const { scene } = useGLTF("/models/pc_combined.glb");
 
   const groupRef = useRef();
   const coolerFans = useRef([]);
   const caseFans = useRef([]);
   const rgbMeshes = useRef([]);
+  const frameCount = useRef(0);
 
   function centerModel(model) {
     const box = new THREE.Box3().setFromObject(model);
@@ -136,7 +126,6 @@ function Model({ scrollProgress, isMobile }) {
       }
 
       if (child.isMesh) {
-        // 👇 Update these names to match your merged GLB's mesh names
         if (
           child.name === "cooler_fan_1" ||
           child.name === "cooler_fan_2" ||
@@ -182,6 +171,8 @@ function Model({ scrollProgress, isMobile }) {
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
+    frameCount.current++;
+
     const sp = scrollProgress.current;
     let prev = keyframes[0];
     let next = keyframes[keyframes.length - 1];
@@ -211,20 +202,23 @@ function Model({ scrollProgress, isMobile }) {
     groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, target.posY, 2.5, delta);
     groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, target.posZ, 2.5, delta);
 
+    // ✅ Fan speed unchanged on both mobile and desktop
     coolerFans.current.forEach((mesh) => { mesh.rotation.y += 0.025; });
     caseFans.current.forEach((pivot) => { pivot.rotation.z += 0.08; });
 
-    const time = state.clock.getElapsedTime();
-    const hue = (time * 0.2) % 1;
-    const rgbColor = new THREE.Color().setHSL(hue, 1, 0.5);
+    // ✅ RGB update throttled — every 3rd frame only
+    if (frameCount.current % 3 === 0) {
+      const time = state.clock.getElapsedTime();
+      const hue = (time * 0.2) % 1;
+      const rgbColor = new THREE.Color().setHSL(hue, 1, 0.5);
 
-    rgbMeshes.current.forEach((mesh) => {
-      mesh.material.emissive = rgbColor;
-      mesh.material.emissiveIntensity = 80;
-      mesh.material.toneMapped = false;
-      mesh.material.needsUpdate = true;
-    });
-
+      rgbMeshes.current.forEach((mesh) => {
+        mesh.material.emissive = rgbColor;
+        mesh.material.emissiveIntensity = 80;
+        mesh.material.toneMapped = false;
+        mesh.material.needsUpdate = true;
+      });
+    }
   });
 
   return (
@@ -233,8 +227,9 @@ function Model({ scrollProgress, isMobile }) {
     </group>
   );
 }
+
 /* ================= CAMERA ================= */
-function CameraRig({ scrollProgress ,isMobile={isMobile}}) {
+function CameraRig({ scrollProgress, isMobile }) {
   const { camera } = useThree();
   const initialized = useRef(false);
 
@@ -245,15 +240,16 @@ function CameraRig({ scrollProgress ,isMobile={isMobile}}) {
     { progress: 0.75, x: -20, y: 20,  z: 16 },
     { progress: 1.0,  x: 0,   y: -10, z: 50 },
   ];
+
   const mobileCamKeyframes = [
     { progress: 0.0,  x: 0,  y: -2, z: 55 },
     { progress: 0.25, x: 1,  y: 4,  z: 33 },
-    { progress: 0.5,  x: 3,  y: 5, z: 6 },  // reduced x drift, gentler z
-    { progress: 0.75, x: -2, y: 3,  z: 49 },  // was -4/6, pulled in close to center
-    { progress: 1.0,  x: 0,  y: -4, z: 55 },  // eased final y
+    { progress: 0.5,  x: 3,  y: 5,  z: 6  },
+    { progress: 0.75, x: -2, y: 3,  z: 49 },
+    { progress: 1.0,  x: 0,  y: -4, z: 55 },
   ];
 
-  const camKeyframes= isMobile? mobileCamKeyframes:DesktopcamKeyframes
+  const camKeyframes = isMobile ? mobileCamKeyframes : DesktopcamKeyframes;
 
   const modelKeyframes = [
     { progress: 0.0,  x: 10,  y: -8,   z: 2 },
@@ -290,7 +286,6 @@ function CameraRig({ scrollProgress ,isMobile={isMobile}}) {
     const targetZ = lerp(prev.z, next.z, t);
 
     if (!initialized.current) {
-      // Snap instantly — no damp on first frame
       camera.position.set(targetX, targetY, targetZ);
       initialized.current = true;
     } else {
@@ -306,7 +301,7 @@ function CameraRig({ scrollProgress ,isMobile={isMobile}}) {
 }
 
 /* ================= NEON TEXT OVERLAY ================= */
-function NeonOverlay({ scrollProgress ,isMobile }) {
+function NeonOverlay({ scrollProgress, isMobile }) {
   const [phase, setPhase] = useState(0);
   const rafRef = useRef();
 
@@ -322,32 +317,27 @@ function NeonOverlay({ scrollProgress ,isMobile }) {
 
   return (
     <>
-      {/* ── HELPER TEXT (scroll hint) — above canvas ── */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "10%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "8px",
-          pointerEvents: "none",
-          opacity: phase === 0 ? 1 : 0,
-          transition: "opacity 0.6s ease",
-          zIndex: 10,
-        }}
-      >
-        <span
-          style={{
-            fontSize: "13px",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "rgba(180,255,240,0.7)",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+      <div style={{
+        position: "absolute",
+        bottom: "10%",
+        left: "50%",
+        transform: "translateX(-50%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "8px",
+        pointerEvents: "none",
+        opacity: phase === 0 ? 1 : 0,
+        transition: "opacity 0.6s ease",
+        zIndex: 10,
+      }}>
+        <span style={{
+          fontSize: "13px",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "rgba(180,255,240,0.7)",
+          fontFamily: "'Inter', sans-serif",
+        }}>
           Scroll to explore
         </span>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -358,58 +348,44 @@ function NeonOverlay({ scrollProgress ,isMobile }) {
             }
             .chevron { animation: bounceDown 1.4s ease infinite; }
           `}</style>
-          <path
-            className="chevron"
-            d="M4 7l6 6 6-6"
-            stroke="rgba(34,211,238,0.8)"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <path className="chevron" d="M4 7l6 6 6-6"
+            stroke="rgba(34,211,238,0.8)" strokeWidth="1.8"
+            strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
 
-      {/* ── PC CRAFT NEON BRAND — BEHIND 3D (zIndex: 0, canvas is zIndex: 1) ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: isMobile ? "20%" : "50%",
-          left: isMobile ? "50%" : "32%",
-          transform: "translate(-50%, -50%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          pointerEvents: "none",
-          opacity: phase === 1 ? 1 : 0,
-          transition: "opacity 0.8s ease",
-          zIndex: isMobile ? 10 : 0,
-        }}
-      >
-        <span
-          style={{
-            fontSize: isMobile ? "8px" : "11px",
-            letterSpacing: "0.35em",
-            textTransform: "uppercase",
-            color: "rgba(34,211,238,0.5)",
-            fontFamily: "'Inter', sans-serif",
-            marginBottom: "10px",
-          }}
-        >
+      <div style={{
+        position: "absolute",
+        top: isMobile ? "20%" : "50%",
+        left: isMobile ? "50%" : "32%",
+        transform: "translate(-50%, -50%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        pointerEvents: "none",
+        opacity: phase === 1 ? 1 : 0,
+        transition: "opacity 0.8s ease",
+        zIndex: isMobile ? 10 : 0,
+      }}>
+        <span style={{
+          fontSize: isMobile ? "8px" : "11px",
+          letterSpacing: "0.35em",
+          textTransform: "uppercase",
+          color: "rgba(34,211,238,0.5)",
+          fontFamily: "'Inter', sans-serif",
+          marginBottom: "10px",
+        }}>
           Engineered for dominance
         </span>
-
         <NeonTitle isMobile={isMobile} />
-
-        <span
-          style={{
-            marginTop: "14px",
-            fontSize: isMobile ? "9px" : "14px",
-            letterSpacing: "0.12em",
-            color: "rgba(180,255,240,0.45)",
-            fontFamily: "'Inter', sans-serif",
-            textTransform: "uppercase",
-          }}
-        >
+        <span style={{
+          marginTop: "14px",
+          fontSize: isMobile ? "9px" : "14px",
+          letterSpacing: "0.12em",
+          color: "rgba(180,255,240,0.45)",
+          fontFamily: "'Inter', sans-serif",
+          textTransform: "uppercase",
+        }}>
           Custom builds · RGB ready · Overclocked
         </span>
       </div>
@@ -417,8 +393,7 @@ function NeonOverlay({ scrollProgress ,isMobile }) {
   );
 }
 
-/* ── PC CRAFT SVG neon sign ── */
-function NeonTitle({isMobile}) {
+function NeonTitle({ isMobile }) {
   return (
     <svg
       viewBox="0 0 520 90"
@@ -465,11 +440,9 @@ function NeonTitle({isMobile}) {
   );
 }
 
-
-
 /* ================= MAIN EXPORT ================= */
 export default function PCModel({ scrollProgress }) {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(null); // null = not yet resolved
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -478,47 +451,69 @@ export default function PCModel({ scrollProgress }) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  // ✅ Don't render until isMobile is known — prevents wrong initial position
   if (isMobile === null) return null;
+
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
-      {/* 3D Canvas */}
       <Canvas
-        dpr={[1, 2]}
+        dpr={isMobile ? 1 : [1, 2]}            // ✅ Mobile locked to DPR 1
         gl={{
-          antialias: true,
+          antialias: !isMobile,                 // ✅ Disable antialias on mobile
           powerPreference: "high-performance",
           toneMapping: THREE.ACESFilmicToneMapping,
         }}
-        camera={{ position: [0, -2, 48], fov: 38 }}
+        camera={{
+          position: isMobile ? [0, -2, 55] : [0, -2, 48],  // ✅ Correct per device
+          fov: 38,
+        }}
         style={{ height: "100%", width: "100%", position: "relative", zIndex: 1 }}
       >
-        <EffectComposer>
-          <Bloom
-            intensity={0.1}
-            luminanceThreshold={0.95}
-            luminanceSmoothing={0.6}
-            mipmapBlur
-          />
-        </EffectComposer>
+        {/* ✅ Bloom disabled on mobile — very expensive */}
+        {!isMobile && (
+          <EffectComposer>
+            <Bloom
+              intensity={0.1}
+              luminanceThreshold={0.95}
+              luminanceSmoothing={0.6}
+              mipmapBlur
+            />
+          </EffectComposer>
+        )}
 
-        <ambientLight intensity={0.25} />
-        <directionalLight position={[8, 14, 12]} intensity={3.5} color="#ffffff" castShadow />
-        <pointLight position={[-14, 4, 6]} intensity={2.8} color="#22d3ee" distance={60} decay={2} />
-        <pointLight position={[12, -10, 4]} intensity={1.8} color="#34d399" distance={50} decay={2} />
-        <pointLight position={[0, 6, -20]} intensity={1.2} color="#818cf8" distance={60} decay={2} />
-        <spotLight position={[0, 20, 20]} angle={0.35} penumbra={0.8} intensity={2} color="#ffe4b5" castShadow={false} />
+        {/* ✅ Reduced to 3 lights total — ambient + directional + 1 accent */}
+        <ambientLight intensity={isMobile ? 0.7 : 0.3} />
+        <directionalLight
+          position={[8, 14, 12]}
+          intensity={isMobile ? 2.5 : 3.5}
+          color="#ffffff"
+        />
+        {/* Single accent point light — replaces the previous 4 */}
+        <pointLight
+          position={[-14, 4, 6]}
+          intensity={isMobile ? 1.5 : 2.8}
+          color="#22d3ee"
+          distance={60}
+          decay={2}
+        />
+        {/* Extra lights only on desktop */}
+        {!isMobile && (
+          <>
+            <pointLight position={[12, -10, 4]} intensity={1.8} color="#34d399" distance={50} decay={2} />
+            <pointLight position={[0, 6, -20]}  intensity={1.2} color="#818cf8" distance={60} decay={2} />
+          </>
+        )}
 
         <Environment preset="city" />
         <Exposure />
 
         <Suspense fallback={<Loader />}>
           <Model scrollProgress={scrollProgress} isMobile={isMobile} />
-          <CameraRig scrollProgress={scrollProgress} isMobile={isMobile}/>
+          <CameraRig scrollProgress={scrollProgress} isMobile={isMobile} />
         </Suspense>
       </Canvas>
 
-      {/* DOM overlay — neon brand + helper + CTA */}
-      <NeonOverlay scrollProgress={scrollProgress}  isMobile={isMobile}/>
+      <NeonOverlay scrollProgress={scrollProgress} isMobile={isMobile} />
     </div>
   );
 }
