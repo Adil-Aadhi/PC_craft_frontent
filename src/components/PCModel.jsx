@@ -108,17 +108,13 @@ function Exposure() {
 }
 
 /* ================= MODEL ================= */
-function Model({ scrollProgress , isMobile}) {
-  const { scene: caseScene } = useGLTF("/models/new_pc_main.glb");
-  const { scene: coolerScene } = useGLTF("/models/new_pc_cooler.glb");
-  const { scene: fanScene } = useGLTF("/models/new_pc_fan.glb");
+function Model({ scrollProgress, isMobile }) {
+  const { scene } = useGLTF("/models/pc_combined.glb"); // your new merged file
 
   const groupRef = useRef();
   const coolerFans = useRef([]);
   const caseFans = useRef([]);
-  const coolerRGB = useRef([]);
-  const caseRGB = useRef([]);
-  
+  const rgbMeshes = useRef([]);
 
   function centerModel(model) {
     const box = new THREE.Box3().setFromObject(model);
@@ -127,47 +123,43 @@ function Model({ scrollProgress , isMobile}) {
   }
 
   useEffect(() => {
-    centerModel(caseScene);
-    centerModel(coolerScene);
-    centerModel(fanScene);
+    centerModel(scene);
 
-    coolerScene.position.set(2, 2, 0);
-    fanScene.position.set(0, 0, -2);
+    coolerFans.current = [];
+    caseFans.current = [];
+    rgbMeshes.current = [];
 
-    coolerScene.traverse((child) => {
-      if (
-        child.isMesh &&
-        (child.name === "Object_4002" ||
-          child.name === "Object_33001" ||
-          child.name === "Object_38002")
-      ) {
-        coolerFans.current.push(child);
-        coolerRGB.current.push(child);
-      }
+    scene.traverse((child) => {
       if (child.material) {
         child.material = child.material.clone();
         child.material.emissive = new THREE.Color("black");
       }
-    });
 
-    fanScene.traverse((child) => {
-      if (child.isMesh && child.name === "Object_2") {
-        const worldPos = new THREE.Vector3();
-        child.getWorldPosition(worldPos);
-        const pivot = new THREE.Group();
-        pivot.position.copy(fanScene.worldToLocal(worldPos));
-        child.position.set(0, 0, 0);
-        pivot.add(child);
-        fanScene.add(pivot);
-        caseFans.current.push(pivot);
-        caseRGB.current.push(child);
-      }
-      if (child.material) {
-        child.material = child.material.clone();
-        child.material.emissive = new THREE.Color("black");
+      if (child.isMesh) {
+        // 👇 Update these names to match your merged GLB's mesh names
+        if (
+          child.name === "cooler_fan_1" ||
+          child.name === "cooler_fan_2" ||
+          child.name === "cooler_fan_3"
+        ) {
+          coolerFans.current.push(child);
+          rgbMeshes.current.push(child);
+        }
+
+        if (child.name === "Object_2") {
+          const worldPos = new THREE.Vector3();
+          child.getWorldPosition(worldPos);
+          const pivot = new THREE.Group();
+          pivot.position.copy(scene.worldToLocal(worldPos));
+          child.position.set(0, 0, 0);
+          pivot.add(child);
+          scene.add(pivot);
+          caseFans.current.push(pivot);
+          rgbMeshes.current.push(child);
+        }
       }
     });
-  }, [caseScene, coolerScene, fanScene]);
+  }, [scene]);
 
   const desktopKeyframes = [
     { progress: 0.0,  rotY: 0.4,  posX: 28,  posY: -14, posZ: 4 },
@@ -178,12 +170,12 @@ function Model({ scrollProgress , isMobile}) {
   ];
 
   const mobileKeyframes = [
-      { progress: 0.0,  rotY: 0.4,  posX: 15,   posY: -12, posZ: 6  },
-      { progress: 0.25, rotY: -1,  posX: -5,   posY: -12, posZ: 8  },  // less posZ swing
-      { progress: 0.5,  rotY: -0.2, posX: 19,   posY: -21, posZ: 6  },  // was 16.5 posX → pulled in, rotY flattened
-      { progress: 0.75, rotY: -0.1, posX: 17,    posY: -12,  posZ: 7  },  // was posY -3 too high, posX 9→7
-      { progress: 1.0,  rotY: 0.5,  posX: 15,   posY: -18, posZ: 4  },  // softened final posY drop
-    ];
+    { progress: 0.0,  rotY: 0.4,  posX: 15,  posY: -12, posZ: 6 },
+    { progress: 0.25, rotY: -1,   posX: -5,  posY: -12, posZ: 8 },
+    { progress: 0.5,  rotY: -0.2, posX: 19,  posY: -21, posZ: 6 },
+    { progress: 0.75, rotY: -0.1, posX: 17,  posY: -12, posZ: 7 },
+    { progress: 1.0,  rotY: 0.5,  posX: 15,  posY: -18, posZ: 4 },
+  ];
 
   const keyframes = isMobile ? mobileKeyframes : desktopKeyframes;
 
@@ -202,7 +194,6 @@ function Model({ scrollProgress , isMobile}) {
       }
     }
 
-    // ✅ Fix 1 — clamp t, prevent NaN at exact keyframe boundaries
     const rawT = next.progress === prev.progress
       ? 0
       : (sp - prev.progress) / (next.progress - prev.progress);
@@ -215,66 +206,33 @@ function Model({ scrollProgress , isMobile}) {
       posZ: lerp(prev.posZ, next.posZ, t),
     };
 
-    // ✅ Fix 2 — lower stiffness 4 → 2.5 for smooth slow scroll
     groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, target.rotY, 2.5, delta);
     groupRef.current.position.x = THREE.MathUtils.damp(groupRef.current.position.x, target.posX, 2.5, delta);
     groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, target.posY, 2.5, delta);
     groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, target.posZ, 2.5, delta);
 
-    coolerFans.current.forEach((pivot) => { pivot.rotation.y += 0.025; });
+    coolerFans.current.forEach((mesh) => { mesh.rotation.y += 0.025; });
     caseFans.current.forEach((pivot) => { pivot.rotation.z += 0.08; });
 
     const time = state.clock.getElapsedTime();
     const hue = (time * 0.2) % 1;
     const rgbColor = new THREE.Color().setHSL(hue, 1, 0.5);
 
-    coolerRGB.current.forEach((mesh) => {
+    rgbMeshes.current.forEach((mesh) => {
       mesh.material.emissive = rgbColor;
       mesh.material.emissiveIntensity = 80;
       mesh.material.toneMapped = false;
       mesh.material.needsUpdate = true;
     });
 
-    caseRGB.current.forEach((mesh) => {
-      mesh.material.emissive = rgbColor;
-      mesh.material.emissiveIntensity = 80;
-      mesh.material.toneMapped = false;
-      mesh.material.needsUpdate = true;
-    });
-
-    coolerScene.traverse((child) => {
-      if (child.isMesh && child.material) {
-        if (coolerRGB.current.includes(child)) return;
-        const c = child.material.color;
-        const matName = child.material.name.toLowerCase();
-        const isRGBPart =
-          c.r > 0.7 && c.g > 0.7 && c.b > 0.7 &&
-          !matName.includes("metal") &&
-          !matName.includes("plastic") &&
-          !matName.includes("logo") &&
-          !matName.includes("pipe") &&
-          !matName.includes("crsr");
-        if (isRGBPart) {
-          child.material.emissive = rgbColor;
-          child.material.emissiveIntensity = 5;
-          child.material.toneMapped = false;
-        } else {
-          child.material.emissiveIntensity = 0;
-          child.material.toneMapped = true;
-        }
-      }
-    });
   });
 
   return (
     <group ref={groupRef} scale={isMobile ? 0.08 : 0.12}>
-      <primitive object={caseScene} dispose={null} />
-      <primitive object={coolerScene} dispose={null} />
-      <primitive object={fanScene} dispose={null} />
+      <primitive object={scene} dispose={null} />
     </group>
   );
 }
-
 /* ================= CAMERA ================= */
 function CameraRig({ scrollProgress ,isMobile={isMobile}}) {
   const { camera } = useThree();
