@@ -37,7 +37,7 @@ const WebSocketProvider = ({ children }) => {
     if (socketRef.current) return;
 
     socketRef.current = new WebSocket(
-     `wss://pccraft3d.duckdns.org/ws/chat/${roomName}/?token=${token}`
+     `ws://pccraft3d.duckdns.org/ws/chat/${roomName}/?token=${token}`
     );
 
     socketRef.current.onopen = () => {

@@ -48,7 +48,7 @@ const WorkerNotifications = () => {
           transition={{ delay: 0.1, duration: 0.3, ease: "easeOut" }}
           className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
         >
-          <NotificationPanel apiUrl={apiUrl} />
+          <NotificationPanel apiUrl={apiUrl}/>
         </motion.div>
       ) : (
         <p className="text-gray-500">No notifications available</p>
