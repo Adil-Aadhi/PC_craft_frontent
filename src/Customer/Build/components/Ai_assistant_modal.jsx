@@ -265,7 +265,7 @@ const AiAssistantModal = ({ onClose }) => {
                   "Best GPU for ₹50,000",
                   "Ryzen 5 vs Intel i5",
                   "PC build under ₹2,00,000",
-                  "Budget gaming PC"
+                  "Best CPU for ₹40,000"
                 ].map((suggestion, i) => (
                   <button
                     key={i}
