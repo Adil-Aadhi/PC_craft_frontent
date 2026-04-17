@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import LeftPanel from "./LeftPanel";
 import RightCart from "./RightPanel";
@@ -85,16 +85,8 @@ const BuildPC = () => {
     }
   }, [isMobile]);
 
-  useEffect(() => {
-    if (!(showPartsModal || showCartSheet)) return;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [showPartsModal, showCartSheet]);
+  // Body overflow lock removed — overlays are glassmorphic/transparent so
+  // the 3D scene remains visible behind them on mobile.
 
   useEffect(() => {
     if (editId) {
@@ -372,8 +364,10 @@ const BuildPC = () => {
             <PCScene build={build} sceneHeight="100vh" />
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 bg-gradient-to-b from-black/75 via-black/25 to-transparent px-4 pb-8 pt-6">
-            <div className="pointer-events-auto flex items-start justify-between gap-3">
+          {/* ── Mobile: top-center glassmorphic floating controls ── */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
+            {/* Header row – title left, reset+close right */}
+            <div className="pointer-events-auto flex items-start justify-between gap-3 bg-gradient-to-b from-black/75 via-black/25 to-transparent px-4 pb-8 pt-6">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.3em] text-cyan-300/70">
                   Mobile Builder
@@ -397,13 +391,12 @@ const BuildPC = () => {
                 </button>
               </div>
             </div>
-          </div>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 px-4 pb-24">
-            <div className="pointer-events-auto ml-auto flex w-fit items-center gap-3 rounded-[28px] border border-white/10 bg-slate-950/55 p-3 shadow-[0_20px_60px_rgba(2,6,23,0.45)] backdrop-blur-2xl">
+            {/* Floating action pill – top-center, glassmorphic */}
+            <div className="pointer-events-auto mx-auto flex w-fit items-center gap-2 rounded-[28px] border border-white/10 bg-white/5 px-3 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl">
               <button
                 onClick={() => setShowPartsModal(true)}
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-3 text-sm font-semibold text-white"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500/90 to-blue-500/90 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-cyan-500/20 transition-transform active:scale-95"
               >
                 <Wrench className="h-4 w-4" />
                 Select Parts
@@ -413,7 +406,7 @@ const BuildPC = () => {
                   setShowCartSheet(true);
                   setCartExpanded(false);
                 }}
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-3 text-sm font-semibold text-white"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500/90 to-cyan-500/90 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-500/20 transition-transform active:scale-95"
               >
                 <ShoppingCart className="h-4 w-4" />
                 Cart
@@ -424,19 +417,21 @@ const BuildPC = () => {
           <AnimatePresence>
             {showPartsModal && (
               <>
+                {/* Semi-transparent backdrop — 3D scene stays visible */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setShowPartsModal(false)}
-                  className="absolute inset-0 z-30 bg-black/60 backdrop-blur-sm"
+                  className="absolute inset-0 z-30 bg-black/20 backdrop-blur-[2px]"
                 />
+                {/* Glassmorphic panel — slides from LEFT with fade */}
                 <motion.div
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={{ duration: 0.28, ease: "easeOut" }}
-                  className="absolute inset-y-0 right-0 z-40 flex w-full flex-col bg-[#050b16] shadow-[0_0_80px_rgba(2,6,23,0.6)]"
+                  initial={{ x: "-100%", opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: "-100%", opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="absolute inset-y-0 left-0 z-40 flex w-[88%] max-w-sm flex-col border-r border-white/10 bg-zinc-900/30 shadow-[4px_0_40px_rgba(0,0,0,0.4)] backdrop-blur-xl"
                 >
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
                     <div>
@@ -462,19 +457,21 @@ const BuildPC = () => {
           <AnimatePresence>
             {showCartSheet && (
               <>
+                {/* Light backdrop — 3D scene stays visible */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setShowCartSheet(false)}
-                  className="absolute inset-0 z-30 bg-black/45 backdrop-blur-sm"
+                  className="absolute inset-0 z-30 bg-black/15 backdrop-blur-[2px]"
                 />
+                {/* Glassmorphic cart sheet — slides from bottom with fade */}
                 <motion.div
-                  initial={{ y: "100%" }}
-                  animate={{ y: 0 }}
-                  exit={{ y: "100%" }}
-                  transition={{ duration: 0.28, ease: "easeOut" }}
-                  className={`absolute inset-x-0 bottom-0 z-40 overflow-hidden rounded-t-[32px] border-t border-white/10 bg-[#08101c]/95 shadow-[0_-20px_60px_rgba(2,6,23,0.55)] backdrop-blur-2xl ${
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: "100%", opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className={`absolute inset-x-0 bottom-0 z-40 overflow-hidden rounded-t-[32px] border border-white/10 bg-zinc-900/30 shadow-[0_-20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl ${
                     cartExpanded ? "h-[90vh]" : "h-[38vh]"
                   }`}
                 >
@@ -604,7 +601,7 @@ const BuildPC = () => {
                 onClick={handleDontSave}
                 className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
               >
-                Don�t Save
+                Don�t Save
               </button>
 
               <button
