@@ -5,37 +5,42 @@ import WorkerNavbar from "../components/workerNavbar";
 export default function WorkerLayout() {
   const location = useLocation();
 
-  // adjust path according to your route
-  const hideSidebar = location.pathname.includes("/profile") ||
+  const isNotificationsPage = location.pathname.includes("/worker/notifications");
+  const isChatPage = location.pathname.includes("/worker/chat");
+
+  const hideSidebar =
+    location.pathname.includes("/profile") ||
     location.pathname.includes("/kyc/page") ||
-    location.pathname.includes("/worker/notifications") ||
-    location.pathname.includes("/worker/chat")
+    isNotificationsPage ||
+    isChatPage;
 
   const hideNavbar =
     location.pathname.includes("/kyc/page") ||
-    location.pathname.includes("/worker/chat")
+    isChatPage;
+
+  const layoutBgClass = isNotificationsPage
+    ? "bg-[#f4f7fb]"
+    : isChatPage
+      ? "bg-transparent"
+      : "bg-gray-100";
+
+  const contentSpacingClass =
+    isNotificationsPage || isChatPage ? "p-0" : "px-4 pb-4 pt-2";
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      {/* Sticky Navbar */}
+    <div className={`min-h-screen ${layoutBgClass}`}>
       {!hideNavbar && <WorkerNavbar />}
 
-      {/* Content Area */}
-      <div className="flex gap-4 px-4 pb-4 pt-2">
-
-        {/* Sidebar (hidden on profile) */}
+      <div className={`flex gap-4 ${contentSpacingClass}`}>
         {!hideSidebar && (
           <div className="hidden lg:block flex-shrink-0 sticky top-24 self-start">
             <WorkerSidebar />
           </div>
         )}
 
-        {/* Main Content */}
         <main className="flex-1">
           <Outlet />
         </main>
-
       </div>
     </div>
   );

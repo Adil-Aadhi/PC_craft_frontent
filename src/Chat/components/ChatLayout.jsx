@@ -4,14 +4,15 @@ import ChatInput from "./ChatInput";
 import { WebSocketContext } from "../context/WebSocketContext";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const ChatLayout = ({ receiverId, roomName, userMap, buildToSend }) => {
-  const {
-    user,
-    connectWebSocket,
-    sendMessage,
-    historyLoaded,
-    socketReady,
-  } = useContext(WebSocketContext);
+const ChatLayout = ({
+  receiverId,
+  roomName,
+  userMap,
+  buildToSend,
+  theme = "dark",
+}) => {
+  const { user, connectWebSocket, sendMessage, historyLoaded, socketReady } =
+    useContext(WebSocketContext);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -19,26 +20,22 @@ const ChatLayout = ({ receiverId, roomName, userMap, buildToSend }) => {
   const hasSentBundle = useRef(false);
   const buildRef = useRef(null);
 
-  // 🔁 Sync ref when buildToSend arrives (fix first-load issue)
   useEffect(() => {
     if (buildToSend) {
       buildRef.current = buildToSend;
     }
   }, [buildToSend]);
 
-  // 🔌 Connect socket when room changes
   useEffect(() => {
     if (roomName) {
       connectWebSocket(roomName);
     }
   }, [roomName, connectWebSocket]);
 
-  // 📦 Auto-send bundle AFTER socket + history ready
   useEffect(() => {
-    if (!buildRef.current) return;
-    if (!socketReady) return;
-    if (!historyLoaded) return;
-    if (hasSentBundle.current) return;
+    if (!buildRef.current || !socketReady || !historyLoaded || hasSentBundle.current) {
+      return;
+    }
 
     const bundlePayload = {
       type: "build_bundle",
@@ -49,28 +46,21 @@ const ChatLayout = ({ receiverId, roomName, userMap, buildToSend }) => {
       },
     };
 
-    console.log("📦 SENDING BUNDLE:", bundlePayload);
-
     sendMessage(bundlePayload);
-
     hasSentBundle.current = true;
-
-    // 🧹 Clear router state so refresh won’t resend
     navigate(location.pathname, { replace: true });
-  }, [socketReady, historyLoaded, navigate, location.pathname]);
+  }, [socketReady, historyLoaded, sendMessage, navigate, location.pathname]);
 
   if (!user || !roomName) return null;
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <ChatBox userMap={userMap} />
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <ChatBox userMap={userMap} theme={theme} />
       </div>
 
-      {/* Input */}
-      <div className="flex-shrink-0">
-        <ChatInput receiverId={receiverId} roomName={roomName} />
+      <div className="shrink-0">
+        <ChatInput receiverId={receiverId} roomName={roomName} theme={theme} />
       </div>
     </div>
   );

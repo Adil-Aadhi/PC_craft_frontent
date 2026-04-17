@@ -1,97 +1,25 @@
-import { useContext, useRef, useEffect } from "react";
+import { useContext, useRef, useEffect, useState, useCallback } from "react";
+import React from "react";
+import { Cpu, PackageOpen } from "lucide-react";
 import { WebSocketContext } from "../context/WebSocketContext";
 import { useProfile } from "../../Customer/context/ProfileContext";
-import { useState } from "react";
 import BuildDetailsModal from "../../cart/components/cartcomponentmodel";
 import api from "../../api/axios";
-import React from "react";
 import { useAuth } from "../../context/AuthContext";
-import { useCallback } from "react";
 
-
-
-const ChatBox = ({userMap }) => {
-  const { messages, user,historyLoaded } = useContext(WebSocketContext);
-  const messagesEndRef = useRef(null);
-  const { profile } = useProfile();
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-  const { user:User } = useAuth();
-  const isWorker = User?.role === "worker";
-  const [selectedBuild, setSelectedBuild] = useState(null);
-  const [bundleStatus, setBundleStatus] = useState({});
-
-   const handleStatusLoad = useCallback((id, status) => {
-        setBundleStatus((prev) => {
-          if (prev[id] === status) return prev; // 🔥 prevent useless state update
-          return { ...prev, [id]: status };
-        });
-      }, []);
-
-
-  const handleCartRequest = async (buildId, status) => {
-      try {
-        await api.post(`/cart/items/${buildId}/status/`, {
-          status: status,
-        });
-
-        setBundleStatus((prev) => ({
-          ...prev,
-          [buildId]: status,
-        }));
-      } catch (err) {
-        console.error("Status update failed", err);
-      }
-    };
-
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  if (!historyLoaded) {
-    return (
-      <div className="flex-1 p-6 space-y-4 animate-pulse">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-            <div className="flex flex-col gap-2">
-              <div className="h-3 w-24 bg-gray-300 rounded"></div>
-              <div className="h-4 w-48 bg-gray-300 rounded"></div>
-            </div>
-          </div>
-        ))}
-
-        <div className="flex justify-end items-start gap-3">
-          <div className="flex flex-col gap-2 items-end">
-            <div className="h-4 w-40 bg-gray-300 rounded"></div>
-            <div className="h-3 w-16 bg-gray-300 rounded"></div>
-          </div>
-          <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-        </div>
-      </div>
-    );
-  }
-
- 
-
-  // Sample component images for visual appeal
-  const COMPONENT_IMAGES = [
-  // "https://images.unsplash.com/photo-1555680202-c86f2e2f7a5a?w=200&h=150&fit=crop&auto=format",
+const COMPONENT_IMAGES = [
   "https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=200&h=150&fit=crop&auto=format",
   "https://images.unsplash.com/photo-1562976540-1502c2145186?w=200&h=150&fit=crop&auto=format",
 ];
 
+const BuildBundleCard = React.memo(
+  ({ buildId, isMe, onStatusLoad, setSelectedBuild, theme }) => {
+    const [loading, setLoading] = useState(false);
+    const [summary, setSummary] = useState(null);
+    const prevStatusRef = useRef(null);
+    const isDark = theme === "dark";
 
- const BuildBundleCard = React.memo(({ buildId, isMe, title = "PC Build",onStatusLoad  }) => {
-  const [loading, setLoading] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [summary, setSummary] = useState(null);
-
-  const prevStatusRef = useRef(null);
-
-   useEffect(() => {
+    useEffect(() => {
       let isMounted = true;
 
       const fetchSummary = async () => {
@@ -100,10 +28,8 @@ const ChatBox = ({userMap }) => {
           if (!isMounted) return;
 
           const newStatus = res.data.status;
-
           setSummary(res.data);
 
-          // 🔥 only fire when status actually changes
           if (prevStatusRef.current !== newStatus) {
             prevStatusRef.current = newStatus;
             onStatusLoad?.(buildId, newStatus);
@@ -118,296 +44,278 @@ const ChatBox = ({userMap }) => {
       return () => {
         isMounted = false;
       };
-    }, [buildId]);
+    }, [buildId, onStatusLoad]);
 
-  const handleOpen = async () => {
+    const handleOpen = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/cart/items/${buildId}/chat/`);
+        setSelectedBuild(res.data);
+      } catch (err) {
+        console.error("Failed to load build", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <button
+        type="button"
+        onClick={handleOpen}
+        className={`relative w-full max-w-[18rem] overflow-hidden rounded-[24px] border text-left transition duration-300 hover:-translate-y-0.5 ${
+          isMe
+            ? "border-orange-300/25 bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-[0_18px_40px_rgba(249,115,22,0.26)]"
+            : isDark
+              ? "border-white/12 bg-white/8 text-slate-100 shadow-[0_18px_40px_rgba(2,6,23,0.24)]"
+              : "border-slate-200 bg-white text-slate-900 shadow-[0_16px_35px_rgba(148,163,184,0.18)]"
+        } ${loading ? "pointer-events-none opacity-80" : ""}`}
+      >
+        <div className="relative h-28 overflow-hidden">
+          <div className="absolute inset-0 flex">
+            {COMPONENT_IMAGES.map((src) => (
+              <img
+                key={src}
+                src={src}
+                alt="component"
+                loading="lazy"
+                className="h-full w-1/2 object-cover"
+                draggable={false}
+              />
+            ))}
+          </div>
+          <div className={`absolute inset-0 ${isMe ? "bg-gradient-to-t from-red-700/90 via-orange-700/35 to-transparent" : "bg-gradient-to-t from-black/75 via-black/25 to-transparent"}`}></div>
+          <span className="absolute bottom-3 right-3 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-md">
+            Custom Build
+          </span>
+        </div>
+
+        <div className="space-y-3 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-sm font-semibold sm:text-base">
+                {summary?.build_name || "PC Build"}
+              </h3>
+              <p className={`mt-1 text-xs ${isMe ? "text-white/75" : isDark ? "text-slate-400" : "text-slate-500"}`}>
+                Open to review selected parts and pricing.
+              </p>
+            </div>
+            <div className={`rounded-xl px-2 py-1 text-[11px] ${isMe ? "bg-white/20" : isDark ? "bg-white/10 text-slate-200" : "bg-slate-100 text-slate-700"}`}>
+              <div className="flex items-center gap-1">
+                <Cpu className="h-3.5 w-3.5" />
+                <span className="max-w-16 truncate">{summary?.cpu || "Build"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={`flex items-center justify-between border-t pt-3 ${isMe ? "border-white/15" : isDark ? "border-white/10" : "border-slate-200"}`}>
+            <div>
+              <p className={`text-[11px] ${isMe ? "text-white/70" : isDark ? "text-slate-500" : "text-slate-500"}`}>
+                Total price
+              </p>
+              <p className="text-lg font-semibold">{summary?.total_price || 0}</p>
+            </div>
+            <span className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-medium ${isMe ? "bg-white text-orange-600" : "bg-gradient-to-r from-orange-500 to-red-500 text-white"}`}>
+              <PackageOpen className="h-3.5 w-3.5" />
+              View Build
+            </span>
+          </div>
+        </div>
+      </button>
+    );
+  }
+);
+
+const ChatBox = ({ userMap, theme = "dark" }) => {
+  const { messages, user, historyLoaded } = useContext(WebSocketContext);
+  const messagesEndRef = useRef(null);
+  const { profile } = useProfile();
+  const { user: authUser } = useAuth();
+  const isWorker = authUser?.role === "worker";
+  const isDark = theme === "dark";
+
+  const [selectedBuild, setSelectedBuild] = useState(null);
+  const [bundleStatus, setBundleStatus] = useState({});
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleStatusLoad = useCallback((id, status) => {
+    setBundleStatus((prev) => {
+      if (prev[id] === status) return prev;
+      return { ...prev, [id]: status };
+    });
+  }, []);
+
+  const handleCartRequest = async (buildId, status) => {
     try {
-      setLoading(true);
-      const res = await api.get(`/cart/items/${buildId}/chat/`);
-      setSelectedBuild(res.data);
+      await api.post(`/cart/items/${buildId}/status/`, { status });
+      setBundleStatus((prev) => ({ ...prev, [buildId]: status }));
     } catch (err) {
-      console.error("Failed to load build", err);
-    } finally {
-      setLoading(false);
+      console.error("Status update failed", err);
     }
   };
 
-  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-  return (
-    <div
-      onClick={handleOpen}
-      className={`
-        relative w-72 rounded-2xl overflow-hidden cursor-pointer 
-        transition-all duration-300 hover:shadow-xl hover:-translate-y-1
-        ${isMe 
-          ? "bg-gradient-to-br from-orange-500 to-red-500 text-white" 
-          : "bg-white text-gray-800 border border-gray-200"
-        }
-        ${loading ? "pointer-events-none opacity-80" : ""}
-      `}
-    >
-      {/* Image Gallery Strip */}
-      <div className="relative h-28 overflow-hidden">
-        <div className="absolute inset-0 flex">
-          {!imageError ? (
-            <>
-              {COMPONENT_IMAGES.map((src, i) => (
-                <img
-                  key={src}                // 🔥 stable key
-                  src={src}
-                  alt="component"
-                  loading="lazy"           // 🔥 prevents blocking
-                  className="w-1/2 h-full object-cover"
-                  draggable={false}
-                />
-              ))}
-            </>
-          ) : (
-            <div className={`w-full h-full flex items-center justify-center ${
-              isMe ? "bg-orange-600" : "bg-gradient-to-br from-orange-50 to-red-50"
-            }`}>
-              <span className="text-5xl filter drop-shadow-lg">⚡</span>
-            </div>
-          )}
-        </div>
-        
-        {/* Gradient Overlay */}
-        <div className={`
-          absolute inset-0 bg-gradient-to-t 
-          ${isMe 
-            ? "from-orange-600/90 via-orange-600/40 to-transparent" 
-            : "from-gray-900/70 via-gray-900/30 to-transparent"
-          }
-        `} />
-
-        {/* Category Tag */}
-        <div className="absolute bottom-2 right-2">
-          <span className={`
-            px-2 py-1 text-[10px] font-medium rounded-full
-            ${isMe 
-              ? "bg-white/30 text-white" 
-              : "bg-orange-500 text-white"
-            }
-          `}>
-            Gaming Rig
-          </span>
-        </div>
-      </div>
-
-      {/* Content Section */}
-      <div className="p-4 space-y-3">
-        {/* Title and Rating */}
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-base font-bold  line-clamp-1 flex items-center gap-1">
-            <span className="bg-white/30 px-1 rounded-lg">
-              {summary?summary?.build_name:"-"}
-             </span> 
-              
-              
-            </h3>
-            <p className={`text-xs mt-0.5 ${isMe ? "text-white/70" : "text-gray-500"}`}>
-              Complete Gaming Setup
-            </p>
-          </div>
-          
-          {/* Quick Specs */}
-          <div className="flex items-center gap-1">
-            <div className={`text-xs px-2 py-1 rounded-full ${
-              isMe ? "bg-white/20" : "bg-orange-100"
-            }`}>
-              {summary?summary?.cpu:"none"}
+  if (!historyLoaded) {
+    return (
+      <div className={`flex-1 space-y-4 p-6 animate-pulse ${isDark ? "bg-transparent" : "bg-transparent"}`}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-start gap-3">
+            <div className={`h-9 w-9 rounded-2xl ${isDark ? "bg-slate-800" : "bg-slate-200"}`}></div>
+            <div className="flex flex-col gap-2">
+              <div className={`h-3 w-24 rounded-full ${isDark ? "bg-slate-800" : "bg-slate-200"}`}></div>
+              <div className={`h-12 w-56 rounded-2xl ${isDark ? "bg-slate-900" : "bg-slate-100"}`}></div>
             </div>
           </div>
-        </div>
-
-        {/* Price and Action */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/10">
-          <div>
-            <p className={`text-xl font-bold ${isMe ? "text-white" : "text-gray-800"}`}>
-              {summary?summary?.total_price:0}
-            </p>
-          </div>
-          
-          <button 
-            className={`
-              px-4 py-2 rounded-xl text-xs font-medium transition-all
-              ${isMe
-                ? "bg-white text-orange-600 hover:bg-gray-100 hover:scale-105"
-                : "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg hover:scale-105"
-              }
-              ${loading ? "opacity-70 cursor-wait" : ""}
-              flex items-center gap-1
-            `}
-            disabled={loading}
-          >
-              <>
-                <span>View Build</span>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </>
-          </button>
-        </div>
+        ))}
       </div>
-
-      {/* Loading Overlay (optional) */}
-      {loading && (
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center rounded-2xl">
-          <div className="bg-white/90 rounded-full p-3 shadow-lg">
-            <svg className="animate-spin h-6 w-6 text-orange-500" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});
-
-
+    );
+  }
 
   return (
-    <div className="flex-1 relative overflow-hidden h-full">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.1),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(216,180,254,0.15),transparent_50%)]"></div>
-      </div>
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
+      <div className={`absolute inset-0 ${isDark ? "bg-[radial-gradient(circle_at_top,_rgba(251,146,60,0.12),_transparent_26%),linear-gradient(180deg,rgba(15,23,42,0.62)_0%,rgba(2,6,23,0.22)_100%)]" : "bg-[radial-gradient(circle_at_top,_rgba(249,115,22,0.10),_transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(255,247,237,0.92)_100%)]"}`}></div>
 
-      {/* Messages container */}
-      <div className="relative h-full overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-transparent">
+      <div className="relative flex-1 overflow-y-auto px-3 py-4 sm:px-5 sm:py-5">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center space-y-3">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center shadow-lg">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+          <div className="flex h-full items-center justify-center">
+            <div className="max-w-sm text-center">
+              <div className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] border ${isDark ? "border-orange-300/20 bg-orange-400/10 text-orange-300" : "border-orange-200 bg-orange-50 text-orange-600"}`}>
+                <PackageOpen className="h-9 w-9" />
               </div>
-              <p className="text-gray-500 font-medium">No messages yet</p>
-              <p className="text-sm text-gray-400">Start a conversation!</p>
+              <h3 className="text-xl font-semibold">No messages yet</h3>
+              <p className={`mt-2 text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                Start with a message or share a build to begin the conversation.
+              </p>
             </div>
           </div>
         ) : (
-          <>
-            {messages.map((m, index) => {
-              const isMe = Number(m.sender_id) === Number(user.id);
-              const showAvatar = index === 0 || messages[index - 1].sender_id !== m.sender_id;
-              console.log("MSG:", m.sender_id, "ME:", user.id);
-              const senderProfile = userMap?.[m.sender_id];
-              const currentStatus = bundleStatus[m.build_ids?.[0]];
-              
-              
+          <div className="space-y-4">
+            {messages.map((message, index) => {
+              const isMe = Number(message.sender_id) === Number(user.id);
+              const showAvatar =
+                index === 0 || messages[index - 1].sender_id !== message.sender_id;
+              const senderProfile = userMap?.[message.sender_id];
+              const currentStatus = bundleStatus[message.build_ids?.[0]];
+
               return (
                 <div
-                  key={m.id}
-                  className={`flex w-full gap-2 ${
-                    isMe ? "justify-end" : "justify-start"
-                  } animate-fadeIn`}
+                  key={message.id}
+                  className={`flex w-full gap-2.5 ${isMe ? "justify-end" : "justify-start"}`}
                 >
-                  {/* Avatar for other users */}
                   {!isMe && (
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 pt-1">
                       {showAvatar ? (
-                          senderProfile?.profile_image ? (
-                            <img
-                              src={senderProfile.profile_image}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white text-sm font-semibold shadow-md">
-                              {senderProfile?.full_name?.[0]?.toUpperCase() ||
-                                m.sender_name?.[0]?.toUpperCase() ||
-                                "U"}
-                            </div>
-                          )
+                        senderProfile?.profile_image ? (
+                          <img
+                            src={senderProfile.profile_image}
+                            alt={senderProfile?.full_name || "User"}
+                            className="h-9 w-9 rounded-2xl object-cover"
+                          />
                         ) : (
-                          <div className="w-8 h-8"></div>
-                        )}
+                          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-sm font-semibold text-white shadow-lg">
+                            {senderProfile?.full_name?.[0]?.toUpperCase() ||
+                              message.sender_name?.[0]?.toUpperCase() ||
+                              "U"}
+                          </div>
+                        )
+                      ) : (
+                        <div className="h-9 w-9"></div>
+                      )}
                     </div>
                   )}
 
-                  {/* Message bubble */}
-                  <div className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-xs lg:max-w-md`}>
+                  <div className={`flex max-w-[84%] flex-col ${isMe ? "items-end" : "items-start"} sm:max-w-[72%]`}>
                     {showAvatar && !isMe && (
-                      <span className="text-xs text-gray-500 mb-1 px-1">
-                        {m.sender_name || "User"}
+                      <span className={`mb-1 px-1 text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                        {message.sender_name || "User"}
                       </span>
                     )}
-                   {m.message_type === "build_bundle" ? (
-                    <div className="flex flex-col gap-2">
-                      <BuildBundleCard buildId={m.build_ids?.[0]} isMe={isMe} onStatusLoad={handleStatusLoad}/>
 
-                      {currentStatus === "accepted" && (
-                          <span className="text-xs px-2 py-1 rounded-lg bg-green-100 text-green-700 mt-1 inline-block">
+                    {message.message_type === "build_bundle" ? (
+                      <div className="flex flex-col gap-2">
+                        <BuildBundleCard
+                          buildId={message.build_ids?.[0]}
+                          isMe={isMe}
+                          onStatusLoad={handleStatusLoad}
+                          setSelectedBuild={setSelectedBuild}
+                          theme={theme}
+                        />
+
+                        {currentStatus === "accepted" && (
+                          <span className="inline-block rounded-xl bg-emerald-100 px-2.5 py-1 text-xs text-emerald-700">
                             Accepted
                           </span>
                         )}
 
                         {currentStatus === "rejected" && (
-                          <span className="text-xs px-2 py-1 rounded-lg bg-red-100 text-red-700 mt-1 inline-block">
+                          <span className="inline-block rounded-xl bg-rose-100 px-2.5 py-1 text-xs text-rose-700">
                             Rejected
                           </span>
                         )}
-                  
-                    </div>
-                      
+                      </div>
                     ) : (
                       <div
-                        className={`px-4 py-2.5 rounded-2xl shadow-md transition-all duration-200 hover:shadow-lg ${
+                        className={`rounded-[22px] px-4 py-3 text-sm leading-relaxed shadow-lg ${
                           isMe
-                            ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-sm"
-                            : "bg-white text-gray-800 rounded-bl-sm border border-gray-100"
+                            ? "rounded-br-md bg-gradient-to-br from-orange-500 via-orange-500 to-red-500 text-white shadow-[0_18px_35px_rgba(249,115,22,0.28)]"
+                            : isDark
+                              ? "rounded-bl-md border border-white/10 bg-white/10 text-slate-100 shadow-[0_18px_35px_rgba(2,6,23,0.2)]"
+                              : "rounded-bl-md border border-orange-100 bg-white text-slate-800 shadow-[0_12px_30px_rgba(251,146,60,0.12)]"
                         }`}
                       >
-                        <p className="text-sm leading-relaxed break-words">{m.message}</p>
+                        <p className="break-words">{message.message}</p>
                       </div>
                     )}
-                    {m.timestamp && (
-                        <div className="flex flex-col items-end mt-1 px-1">
-                          <span className="text-xs text-gray-400">
-                            {new Date(m.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
 
-                          {/* Seen text only for my last message */}
-                          {isMe && index === messages.length - 1 && m.is_seen && (
-                            <span className="text-[11px] text-gray-400 mt-0.5">Seen</span>
-                          )}
-                        </div>
-                      )}
+                    {message.timestamp && (
+                      <div className="mt-1.5 flex flex-col items-end px-1">
+                        <span className={`text-[11px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                          {new Date(message.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                        {isMe && index === messages.length - 1 && message.is_seen && (
+                          <span className={`mt-0.5 text-[11px] ${isDark ? "text-orange-300" : "text-orange-600"}`}>
+                            Seen
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Avatar for current user */}
                   {isMe && (
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 pt-1">
                       {showAvatar ? (
-                              profile?.profile_image ? (
-                                <img
-                                  src={profile.profile_image}
-                                  className="w-8 h-8 rounded-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
-                                  {profile?.full_name?.[0]?.toUpperCase() || "M"}
-                                </div>
-                              )
-                            ) : (
-                              <div className="w-8 h-8"></div>
-                            )}
+                        profile?.profile_image ? (
+                          <img
+                            src={profile.profile_image}
+                            alt={profile?.full_name || "Me"}
+                            className="h-9 w-9 rounded-2xl object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-sm font-semibold text-white shadow-lg">
+                            {profile?.full_name?.[0]?.toUpperCase() || "M"}
+                          </div>
+                        )
+                      ) : (
+                        <div className="h-9 w-9"></div>
+                      )}
                     </div>
                   )}
                 </div>
               );
             })}
             <div ref={messagesEndRef} />
-          </>
+          </div>
         )}
       </div>
+
       {selectedBuild && (
         <BuildDetailsModal
           build={selectedBuild}
