@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap,
@@ -13,7 +13,7 @@ import {
   UserPlus,
   LogOut,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import LoginRequiredToast from "./LoginRequiredToast";
 import { useAuth } from "../context/AuthContext";
@@ -26,6 +26,7 @@ const Navbar = ({ variant = "dark" }) => {
   const [authOpen, setAuthOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const userRef = useRef(null);
   const closeTimeout = useRef(null);
@@ -110,26 +111,31 @@ const Navbar = ({ variant = "dark" }) => {
         {
           label: "Messages",
           icon: MessageSquare,
+          path: "/chat",
           action: () => navigate("/chat"),
         },
         {
           label: "Cart",
           icon: ShoppingCart,
+          path: "/cart",
           action: () => navigate("/cart"),
         },
         {
           label: "Notifications",
           icon: BellDot,
+          path: "/user/notifications",
           action: () => navigate("/user/notifications"),
         },
         {
           label: "Orders",
           icon: BoxIcon,
+          path: "/user/orders",
           action: () => navigate("/user/orders"),
         },
         {
           label: "Profile",
           icon: User,
+          path: "/user/profile",
           action: () => navigate("/user/profile"),
         },
         {
@@ -143,31 +149,37 @@ const Navbar = ({ variant = "dark" }) => {
         {
           label: "Messages",
           icon: MessageSquare,
+          path: "/chat",
           action: HandleMessageClick,
         },
         {
           label: "Cart",
           icon: ShoppingCart,
+          path: "/cart",
           action: HandleCartClick,
         },
         {
           label: "Notifications",
           icon: BellDot,
+          path: "/user/notifications",
           action: () => navigate("/user/notifications"),
         },
         {
           label: "Orders",
           icon: BoxIcon,
+          path: "/user/orders",
           action: () => navigate("/user/orders"),
         },
         {
           label: "Login",
           icon: LogIn,
+          path: "/login",
           action: () => navigate("/login"),
         },
         {
           label: "Sign Up",
           icon: UserPlus,
+          path: "/register",
           action: () => navigate("/register"),
         },
       ];
@@ -270,62 +282,95 @@ const Navbar = ({ variant = "dark" }) => {
         </nav>
       </header>
 
+      {/* ── Mobile fullscreen glassmorphic overlay menu (md:hidden) ── */}
       <AnimatePresence>
         {mobileOpen && (
           <>
-            <motion.button
-              type="button"
+            {/* Backdrop — clicking outside closes menu */}
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-[70] bg-slate-950/40 backdrop-blur-[2px] md:hidden"
-              aria-label="Close mobile menu"
+              className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm md:hidden"
+              aria-hidden="true"
             />
 
+            {/* Glassmorphic panel — slides down from top */}
             <motion.div
-              initial={{ opacity: 0, y: -12, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.98 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed left-4 right-4 top-24 z-[80] rounded-[28px] border border-cyan-400/20 bg-[linear-gradient(135deg,rgba(15,23,42,0.92),rgba(8,47,73,0.85))] p-3 shadow-[0_30px_80px_rgba(8,145,178,0.22)] backdrop-blur-2xl ring-1 ring-white/10 md:hidden"
+              initial={{ opacity: 0, y: "-8%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "-8%" }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+              className="fixed inset-x-0 top-0 z-[80] md:hidden"
             >
-              <div className="mb-3 flex items-center justify-between px-2 pt-1">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-cyan-200/70">Quick Menu</p>
-                  <h3 className="mt-1 text-lg font-semibold text-white">Navigation</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-slate-100"
-                  aria-label="Close mobile menu"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+              {/* Glass card */}
+              <div className="m-3 mt-4 rounded-2xl border border-white/10 bg-zinc-900/20 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
 
-              <div className="grid grid-cols-1 gap-2">
-                {mobileMenuItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => handleMobileItemClick(item.action)}
-                      className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition ${
-                        item.danger
-                          ? "border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/15"
-                          : "border-white/10 bg-white/8 text-slate-100 hover:bg-white/12"
-                      }`}
-                    >
-                      <span className={`flex h-10 w-10 items-center justify-center rounded-2xl ${item.danger ? "bg-red-500/15" : "bg-cyan-400/10 text-cyan-200"}`}>
-                        <Icon className="h-4.5 w-4.5" />
-                      </span>
-                      <span className="text-sm font-medium">{item.label}</span>
-                    </button>
-                  );
-                })}
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.3em] text-cyan-300/70">Quick Menu</p>
+                    <h3 className="mt-0.5 text-lg font-semibold text-white">Navigation</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-slate-100 backdrop-blur-sm transition hover:bg-white/20 active:scale-95"
+                    aria-label="Close mobile menu"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Nav items */}
+                <div className="grid grid-cols-1 gap-1.5 p-3">
+                  {mobileMenuItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = item.path && location.pathname === item.path;
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => handleMobileItemClick(item.action)}
+                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium transition active:scale-[0.98] ${
+                          item.danger
+                            ? "bg-red-500/10 text-red-300 hover:bg-red-500/20"
+                            : isActive
+                              ? "border border-cyan-400/25 bg-white/20 text-white shadow-[0_0_12px_rgba(34,211,238,0.15)]"
+                              : "text-slate-100 hover:bg-white/10"
+                        }`}
+                      >
+                        <span
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                            item.danger
+                              ? "bg-red-500/15 text-red-300"
+                              : isActive
+                                ? "bg-cyan-400/20 text-cyan-300"
+                                : "bg-white/10 text-slate-300"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span>{item.label}</span>
+                        {isActive && (
+                          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Footer — Build Now CTA */}
+                <div className="border-t border-white/10 p-3">
+                  <button
+                    onClick={() => { setMobileOpen(false); handleBuildClick(); }}
+                    className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(16,185,129,0.25)] transition active:scale-[0.98]"
+                  >
+                    Build Your PC Now
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { aiApi } from "../../../api/axios";
 import { 
   X, 
@@ -49,6 +50,12 @@ const AiAssistantModal = ({ onClose }) => {
     }
   };
 
+  const handleClear = () => {
+    setResponse(null);
+    setQuestion("");
+    setLoading(false);
+  };
+
   // Normalize: smart_build wraps data inside response.result
   // build returns data directly on response
   const isBuild = response?.type === "build" || response?.type === "smart_build";
@@ -63,11 +70,17 @@ const AiAssistantModal = ({ onClose }) => {
     : 0;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-b from-gray-900 to-gray-950 border border-gray-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm sm:p-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.97 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/20 shadow-[0_0_40px_rgba(0,255,255,0.07),0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl max-h-[90vh]"
+      >
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800 bg-gray-900/50">
+        <div className="flex items-center justify-between border-b border-white/10 bg-white/5 p-4 sm:p-5 backdrop-blur-lg">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-cyan-500/10 rounded-xl">
               <Sparkles className="w-5 h-5 text-cyan-400" />
@@ -82,13 +95,13 @@ const AiAssistantModal = ({ onClose }) => {
               <p className="text-sm text-gray-400">Ask me anything about PC builds, components, or gaming rigs</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-800 rounded-xl transition-all duration-200 group">
-            <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
+          <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/10 text-slate-300 backdrop-blur-sm transition hover:bg-white/20 active:scale-95">
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Main Content */}
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
 
           {/* Input */}
           <div className="relative mb-6">
@@ -98,7 +111,7 @@ const AiAssistantModal = ({ onClose }) => {
               onChange={(e) => setQuestion(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Example: Build gaming PC under ₹1,00,000 or Best GPU for video editing"
-              className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 pr-24 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-200"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-24 text-white placeholder-gray-500 backdrop-blur-md transition-all duration-200 focus:border-cyan-500/60 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
             />
             <button
               onClick={askAI}
@@ -116,9 +129,9 @@ const AiAssistantModal = ({ onClose }) => {
           {/* Loading Skeleton */}
           {loading && (
             <div className="space-y-3 animate-pulse">
-              <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-800 rounded w-1/2"></div>
-              <div className="h-4 bg-gray-800 rounded w-2/3"></div>
+              <div className="h-4 rounded bg-white/10 w-3/4"></div>
+              <div className="h-4 rounded bg-white/10 w-1/2"></div>
+              <div className="h-4 rounded bg-white/10 w-2/3"></div>
             </div>
           )}
 
@@ -132,7 +145,7 @@ const AiAssistantModal = ({ onClose }) => {
 
           {/* Chat Response */}
           {response?.type === "chat" && !loading && (
-            <div className="mt-6 p-4 bg-gray-800/30 rounded-xl border border-gray-700">
+            <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-cyan-500/10 rounded-lg flex-shrink-0">
                   <Sparkles className="w-4 h-4 text-cyan-400" />
@@ -151,7 +164,7 @@ const AiAssistantModal = ({ onClose }) => {
               </div>
               <div className="grid gap-3">
                 {response.results.map((gpu, i) => (
-                  <div key={i} className="bg-gray-800/30 border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition-all duration-200">
+                  <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-md transition-all duration-200 hover:border-purple-500/30 hover:bg-white/8 hover:shadow-[0_0_12px_rgba(168,85,247,0.12)]">
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="text-white font-medium">{gpu.name}</h4>
                       <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">Recommended</span>
@@ -174,18 +187,18 @@ const AiAssistantModal = ({ onClose }) => {
                 <Cpu className="w-5 h-5 text-blue-400" />
                 <h3 className="text-blue-400 font-semibold">CPU Recommendation</h3>
               </div>
-              <div className="bg-gray-800/30 border border-gray-700 rounded-xl p-4 hover:border-blue-500/50 transition-all duration-200">
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-md transition-all duration-200 hover:border-blue-500/30 hover:shadow-[0_0_12px_rgba(59,130,246,0.12)]">
                 <h4 className="text-white font-medium mb-3">{response.results.name}</h4>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="p-2 bg-gray-800 rounded-lg">
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-2">
                     <p className="text-gray-500">Price</p>
                     <p className="text-white font-medium">₹{response.results.price?.toLocaleString()}</p>
                   </div>
-                  <div className="p-2 bg-gray-800 rounded-lg">
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-2">
                     <p className="text-gray-500">Cores</p>
                     <p className="text-white font-medium">{response.results.cores}</p>
                   </div>
-                  <div className="p-2 bg-gray-800 rounded-lg col-span-2">
+                  <div className="rounded-lg border border-white/5 bg-white/5 p-2 col-span-2">
                     <p className="text-gray-500">Socket</p>
                     <p className="text-white font-medium">{response.results.socket}</p>
                   </div>
@@ -205,7 +218,7 @@ const AiAssistantModal = ({ onClose }) => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-xs text-gray-400">Scroll to see all components ↓</p>
-                  <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                  <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-1 backdrop-blur-md">
                     <p className="text-xs text-gray-400">Total</p>
                     <p className="text-sm text-amber-400 font-semibold">₹{totalPrice.toLocaleString()}</p>
                   </div>
@@ -224,8 +237,8 @@ const AiAssistantModal = ({ onClose }) => {
                     case_fans: "Case Fans"
                   }).map(([key, label]) =>
                     build[key] ? (
-                      <div key={key} className="bg-gray-800/30 border border-gray-700 rounded-lg p-3 flex items-start gap-3 hover:bg-gray-800/50 transition-all duration-200">
-                        <div className="p-1.5 bg-gray-700 rounded-lg">
+                      <div key={key} className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-md transition-all duration-200 hover:border-cyan-500/20 hover:bg-white/8 hover:shadow-[0_0_10px_rgba(0,255,255,0.07)]">
+                        <div className="rounded-lg border border-white/10 bg-white/10 p-1.5">
                           {key === "cpu"        && <Cpu className="w-4 h-4 text-blue-400" />}
                           {key === "gpu"        && <Monitor className="w-4 h-4 text-purple-400" />}
                           {key === "motherboard"&& <CircuitBoard className="w-4 h-4 text-indigo-400" />}
@@ -248,7 +261,7 @@ const AiAssistantModal = ({ onClose }) => {
 
                 {/* AI Explanation */}
                 {aiExplanation && (
-                  <div className="mt-4 p-3 bg-gray-800/20 border border-gray-700 rounded-lg">
+                  <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-md">
                     <p className="text-xs text-gray-400 italic leading-relaxed">{aiExplanation}</p>
                   </div>
                 )}
@@ -270,7 +283,7 @@ const AiAssistantModal = ({ onClose }) => {
                   <button
                     key={i}
                     onClick={() => setQuestion(suggestion)}
-                    className="px-3 py-1.5 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg text-xs text-gray-400 hover:text-white transition-all duration-200"
+                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-gray-300 backdrop-blur-md transition-all duration-200 hover:border-cyan-500/30 hover:bg-white/10 hover:text-white"
                   >
                     {suggestion}
                   </button>
@@ -281,9 +294,18 @@ const AiAssistantModal = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-gray-800 bg-gray-900/50">
+        <div className="flex items-center justify-between border-t border-white/10 bg-white/5 p-3 sm:p-4 backdrop-blur-lg">
           <p className="text-xs text-gray-500">Powered by advanced AI • PC component recommendations</p>
           <div className="flex gap-2">
+            {response && !loading && (
+              <button
+                onClick={handleClear}
+                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-slate-300 backdrop-blur-sm transition hover:bg-white/15 active:scale-95"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Clear
+              </button>
+            )}
             {/* Show "Build This PC" for both build types */}
             {isBuild && build && (
               <button
@@ -302,13 +324,13 @@ const AiAssistantModal = ({ onClose }) => {
             )}
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300 text-sm font-medium transition-all duration-200"
+              className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-slate-300 backdrop-blur-sm transition hover:bg-white/15 active:scale-95"
             >
               Close
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -122,7 +122,7 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
         width: "100%",
         height: sceneHeight,
         background:
-          "radial-gradient(ellipse at 30% 60%, #2a0a4a 0%, #151530 45%, #0b0b18 100%)",
+          "radial-gradient(ellipse at 50% 70%, #141418 0%, #0c0c10 45%, #050507 100%)",
         overflow: "hidden",
       }}
     >
@@ -135,7 +135,7 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
           pointerEvents: "none",
           zIndex: 0,
           background:
-            "radial-gradient(ellipse at 70% 40%, rgba(120,40,255,0.25) 0%, transparent 55%)",
+            "radial-gradient(ellipse at 70% 40%, rgba(120,40,255,0.08) 0%, transparent 55%)",
         }}
       />
 
@@ -146,23 +146,11 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
           pointerEvents: "none",
           zIndex: 0,
           background:
-            "radial-gradient(ellipse at 15% 85%, rgba(0,180,255,0.16) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 15% 85%, rgba(0,180,255,0.06) 0%, transparent 50%)",
         }}
       />
 
-      <div
-        style={{
-          position: "absolute",
-          bottom: "28%",
-          left: 0,
-          right: 0,
-          height: "1px",
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(140,60,255,0.35) 30%, rgba(0,180,255,0.25) 70%, transparent 100%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
+
 
       <div
         style={{
@@ -206,9 +194,8 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
               padding: "10px 18px",
               background: showGlass ? "rgba(14,165,233,0.25)" : "rgba(255,255,255,0.08)",
               color: showGlass ? "#7dd3fc" : "rgba(255,255,255,0.65)",
-              border: `1px solid ${
-                showGlass ? "rgba(125,211,252,0.4)" : "rgba(255,255,255,0.12)"
-              }`,
+              border: `1px solid ${showGlass ? "rgba(125,211,252,0.4)" : "rgba(255,255,255,0.12)"
+                }`,
               borderRadius: "10px",
               cursor: "pointer",
               fontWeight: 500,
@@ -218,14 +205,14 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
               whiteSpace: "nowrap",
             }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.background = showGlass
-                ? "rgba(14,165,233,0.35)"
-                : "rgba(255,255,255,0.14)")
+            (e.currentTarget.style.background = showGlass
+              ? "rgba(14,165,233,0.35)"
+              : "rgba(255,255,255,0.14)")
             }
             onMouseLeave={(e) =>
-              (e.currentTarget.style.background = showGlass
-                ? "rgba(14,165,233,0.25)"
-                : "rgba(255,255,255,0.08)")
+            (e.currentTarget.style.background = showGlass
+              ? "rgba(14,165,233,0.25)"
+              : "rgba(255,255,255,0.08)")
             }
           >
             <svg
@@ -253,9 +240,8 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
               padding: "10px 18px",
               background: rgbEnabled ? "rgba(168,85,247,0.22)" : "rgba(255,255,255,0.08)",
               color: rgbEnabled ? "#d8b4fe" : "rgba(255,255,255,0.65)",
-              border: `1px solid ${
-                rgbEnabled ? "rgba(216,180,254,0.35)" : "rgba(255,255,255,0.12)"
-              }`,
+              border: `1px solid ${rgbEnabled ? "rgba(216,180,254,0.35)" : "rgba(255,255,255,0.12)"
+                }`,
               borderRadius: "10px",
               cursor: "pointer",
               fontWeight: 500,
@@ -265,14 +251,14 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
               whiteSpace: "nowrap",
             }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.background = rgbEnabled
-                ? "rgba(168,85,247,0.32)"
-                : "rgba(255,255,255,0.14)")
+            (e.currentTarget.style.background = rgbEnabled
+              ? "rgba(168,85,247,0.32)"
+              : "rgba(255,255,255,0.14)")
             }
             onMouseLeave={(e) =>
-              (e.currentTarget.style.background = rgbEnabled
-                ? "rgba(168,85,247,0.22)"
-                : "rgba(255,255,255,0.08)")
+            (e.currentTarget.style.background = rgbEnabled
+              ? "rgba(168,85,247,0.22)"
+              : "rgba(255,255,255,0.08)")
             }
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -286,6 +272,7 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
 
       <Canvas
         shadows
+        dpr={[1, 1.5]}
         camera={{ position: [3.5, 2, 5], fov: 40 }}
         style={{ width: "100%", height: "100%", position: "relative", zIndex: 1 }}
         onCreated={({ camera, gl }) => {
@@ -296,15 +283,8 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
       >
         <LoadingTracker onProgress={setLoadProgress} onLoaded={() => setIsLoading(false)} />
 
-        <ambientLight intensity={0.28} color="#c7d2ff" />
-        <directionalLight position={[5, 5, 5]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
-        <directionalLight position={[-5, 3, 2]} intensity={0.5} color="#8ba5ff" />
-        <directionalLight position={[0, 4, -5]} intensity={1.2} color="#ffffff" />
-        <directionalLight position={[0, 6, 0]} intensity={0.6} />
-        <pointLight position={[2, 1, 2]} intensity={0.4} color="#4466ff" />
-        <pointLight position={[-2, 1.5, -2]} intensity={0.3} color="#ff8844" />
-        <pointLight position={[-4, 2, -2]} intensity={0.5} color="#7828ff" />
-        <pointLight position={[4, 1, 3]} intensity={0.3} color="#00b4ff" />
+        <ambientLight intensity={0.3} color="#c7d2ff" />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow shadow-mapSize={[512, 512]} />
 
         <Table />
 
@@ -343,29 +323,27 @@ export default function PCScene({ build, sceneHeight = "900px" }) {
           </group>
         </Suspense>
 
-        <Environment preset="studio" intensity={0.15} />
-
-        <directionalLight position={[0, 2, 5]} intensity={0.6} color="#ffffff" />
+        <Environment preset="studio" intensity={0.08} />
 
         <ContactShadows
           position={[0, -1.19, 0]}
-          opacity={0.28}
+          opacity={0.2}
           scale={10}
-          blur={3.5}
+          blur={2.5}
           far={2}
-          resolution={1024}
+          resolution={256}
           color="#8b5cf6"
         />
 
         <EffectComposer>
-          <Bloom intensity={0.45} luminanceThreshold={0.6} luminanceSmoothing={0.9} />
+          <Bloom intensity={0.25} luminanceThreshold={0.6} luminanceSmoothing={0.9} />
         </EffectComposer>
 
         <OrbitControls
           enableDamping
           dampingFactor={0.05}
           minDistance={2.5}
-          maxDistance={8}
+          maxDistance={6}
           autoRotate
           autoRotateSpeed={0.5}
           maxPolarAngle={Math.PI / 2}
