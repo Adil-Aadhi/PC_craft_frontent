@@ -17,7 +17,7 @@ const StatusCard = ({ title, count, color = "gray", icon }) => {
           iconColor: "text-amber-400",
           glow: "group-hover:shadow-[0_0_30px_-5px_rgba(245,158,11,0.2)]",
           glowColor: "bg-amber-500",
-          icon: <Clock className="w-5 h-5" />
+          icon: <Clock className="w-4 h-4 md:w-5 md:h-5" />
         };
       case "blue":
         return {
@@ -27,7 +27,7 @@ const StatusCard = ({ title, count, color = "gray", icon }) => {
           iconColor: "text-blue-400",
           glow: "group-hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.2)]",
           glowColor: "bg-blue-500",
-          icon: <Loader2 className="w-5 h-5 animate-spin-slow" />
+          icon: <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin-slow" />
         };
       case "green":
         return {
@@ -37,7 +37,7 @@ const StatusCard = ({ title, count, color = "gray", icon }) => {
           iconColor: "text-emerald-400",
           glow: "group-hover:shadow-[0_0_30px_-5px_rgba(16,185,129,0.2)]",
           glowColor: "bg-emerald-500",
-          icon: <PackageCheck className="w-5 h-5" />
+          icon: <PackageCheck className="w-4 h-4 md:w-5 md:h-5" />
         };
       case "red":
         return {
@@ -47,7 +47,7 @@ const StatusCard = ({ title, count, color = "gray", icon }) => {
           iconColor: "text-rose-400",
           glow: "group-hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.2)]",
           glowColor: "bg-rose-500",
-          icon: <XCircle className="w-5 h-5" />
+          icon: <XCircle className="w-4 h-4 md:w-5 md:h-5" />
         };
       default:
         return {
@@ -57,7 +57,7 @@ const StatusCard = ({ title, count, color = "gray", icon }) => {
           iconColor: "text-zinc-400",
           glow: "group-hover:shadow-[0_0_30px_-5px_rgba(113,113,122,0.2)]",
           glowColor: "bg-zinc-500",
-          icon: <Clock className="w-5 h-5" />
+          icon: <Clock className="w-4 h-4 md:w-5 md:h-5" />
         };
     }
   };
@@ -67,19 +67,19 @@ const StatusCard = ({ title, count, color = "gray", icon }) => {
   return (
     <motion.div
       whileHover={{ y: -4, scale: 1.02 }}
-      className={`group relative overflow-hidden rounded-[24px] p-6 ${config.bg} border ${config.border} backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.04] ${config.glow}`}
+      className={`group relative overflow-hidden rounded-2xl md:rounded-[24px] p-4 md:p-6 ${config.bg} border ${config.border} backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.04] ${config.glow}`}
     >
-      <div className="relative z-10 flex flex-col gap-5">
+      <div className="relative z-10 flex flex-col gap-3 md:gap-5">
         <div className="flex justify-between items-start">
-          <div className={`p-3 rounded-2xl ${config.iconBg} ${config.iconColor} border border-white/5`}>
+          <div className={`p-2 md:p-3 rounded-xl md:rounded-2xl ${config.iconBg} ${config.iconColor} border border-white/5`}>
             {config.icon}
           </div>
-          <p className="text-4xl font-black font-mono tracking-tighter bg-gradient-to-br from-white via-white/80 to-white/20 bg-clip-text text-transparent">
+          <p className="text-2xl md:text-4xl font-black font-mono tracking-tighter bg-gradient-to-br from-white via-white/80 to-white/20 bg-clip-text text-transparent">
             {count}
           </p>
         </div>
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 group-hover:text-zinc-200 transition-colors">
+          <h3 className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-zinc-400 group-hover:text-zinc-200 transition-colors">
             {title}
           </h3>
         </div>

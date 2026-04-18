@@ -8,19 +8,21 @@ const MENU = [
 const ProfileTabs = ({ active, setActive }) => {
   return (
     <div className="
-      flex gap-1 p-2
+      flex gap-1 p-1.5 md:p-2
       bg-white/70 backdrop-blur-md
       border border-gray-200/60
-      rounded-2xl shadow-lg shadow-black/5
+      rounded-xl md:rounded-2xl shadow-lg shadow-black/5
+      overflow-x-auto scrollbar-none
+      w-full max-w-full
     ">
       {MENU.map((item) => (
         <button
           key={item.id}
           onClick={() => setActive(item.id)}
           className={`
-            relative flex-1 px-8 py-3 rounded-xl text-sm font-medium
+            relative flex-1 px-4 md:px-8 py-2.5 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-medium
             transition-all duration-300
-            overflow-hidden group
+            overflow-hidden group shrink-0
             ${
               active === item.id
                 ? "text-black"
@@ -56,3 +58,19 @@ const ProfileTabs = ({ active, setActive }) => {
 };
 
 export default ProfileTabs;
+
+/* Add scrollbar-none to global CSS or as style here */
+const styles = `
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+`;
+if (typeof document !== 'undefined') {
+  const styleEl = document.createElement('style');
+  styleEl.textContent = styles;
+  document.head.appendChild(styleEl);
+}

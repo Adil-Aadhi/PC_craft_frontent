@@ -12,7 +12,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 import LogoutModal from "../../Admin/components/AdminLogoutModal";
 
-export default function WorkerSidebar() {
+export default function WorkerSidebar({ forceOpen }) {
   const navigate = useNavigate();
   const {handleLogout}=useAuth()
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -22,7 +22,8 @@ export default function WorkerSidebar() {
       initial={{ x: -40, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="group bg-gradient-to-b from-gray-900 to-gray-800 text-white rounded-2xl shadow-xl sticky top-20 transition-all duration-300 w-20 hover:w-64 flex flex-col overflow-hidden p-3 mt-10"
+      className={`group text-white rounded-[2rem] shadow-2xl transition-all duration-300 flex flex-col overflow-hidden p-4 
+        ${forceOpen ? "w-[min(85vw,280px)] max-h-[75vh] bg-white/10 backdrop-blur-2xl border border-white/20" : "bg-gradient-to-b from-gray-900 to-gray-800 w-20 hover:w-64 sticky top-20 mt-10 shadow-xl"}`}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 p-3 mb-4">
@@ -33,7 +34,7 @@ export default function WorkerSidebar() {
           <FiCpu className="text-xl" />
         </motion.div>
 
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className={`${forceOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200`}>
           <h1 className="text-base font-bold whitespace-nowrap">
             PC Customizer
           </h1>
@@ -53,10 +54,10 @@ export default function WorkerSidebar() {
           visible: { transition: { staggerChildren: 0.05 } },
         }}
       >
-        <NavItem icon={<FiTrendingUp />} label="Overview" onClick={() => navigate("/worker/dashboard")} />
-        <NavItem icon={<FiPackage />} label="Projects" onClick={() => navigate("/worker/projects")} />
-        <NavItem icon={<FiDollarSign />} label="Earnings" onClick={() => navigate("/worker/revenue")} />
-        <NavItem icon={<FiUser />} label="Profile" onClick={() => navigate("/worker/profile")} />
+        <NavItem icon={<FiTrendingUp />} label="Overview" onClick={() => navigate("/worker/dashboard")} forceOpen={forceOpen} />
+        <NavItem icon={<FiPackage />} label="Projects" onClick={() => navigate("/worker/projects")} forceOpen={forceOpen} />
+        <NavItem icon={<FiDollarSign />} label="Earnings" onClick={() => navigate("/worker/revenue")} forceOpen={forceOpen} />
+        <NavItem icon={<FiUser />} label="Profile" onClick={() => navigate("/worker/profile")} forceOpen={forceOpen} />
 
         {/* Divider */}
         <div className="my-3 border-t border-gray-700 opacity-60" />
@@ -66,6 +67,7 @@ export default function WorkerSidebar() {
           icon={<FiLogOut />}
           label="Logout"
           onClick={()=>setLogoutOpen(true)}
+          forceOpen={forceOpen}
           danger
         />
       </motion.nav>
@@ -79,7 +81,7 @@ export default function WorkerSidebar() {
 }
 
 /* Sidebar Item */
-const NavItem = ({ icon, label, active, count, onClick, danger }) => (
+const NavItem = ({ icon, label, active, count, onClick, danger, forceOpen }) => (
   <motion.button
     onClick={onClick}
     variants={{
@@ -95,13 +97,15 @@ const NavItem = ({ icon, label, active, count, onClick, danger }) => (
           ? "text-red-400 hover:bg-red-500/10 hover:text-red-300"
           : active
           ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
+          : forceOpen 
+          ? "text-white/90 hover:bg-white/10 hover:text-white"
           : "text-gray-300 hover:bg-gray-800 hover:text-white"
       }
     `}
   >
     <span className="text-lg shrink-0">{icon}</span>
 
-    <span className="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+    <span className={`${forceOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity whitespace-nowrap`}>
       {label}
     </span>
 
@@ -109,7 +113,7 @@ const NavItem = ({ icon, label, active, count, onClick, danger }) => (
       <motion.span
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity bg-blue-500 text-white text-xs px-2 py-1 rounded-full"
+        className={`ml-auto ${forceOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity bg-blue-500 text-white text-xs px-2 py-1 rounded-full`}
       >
         {count}
       </motion.span>

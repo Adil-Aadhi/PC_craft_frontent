@@ -225,9 +225,9 @@ const ProfileImage = () => {
       </div>
 
       {/* Profile Section */}
-      <div className="relative bg-white rounded-b-2xl shadow-lg border border-slate-100 -mt-20 pt-16 pb-8 px-8">
+      <div className="relative bg-white rounded-b-2xl shadow-lg border border-slate-100 -mt-20 pt-20 md:pt-16 pb-6 md:pb-8 px-6 md:px-8">
         {/* Profile Image - Overlapping Banner */}
-        <div className="absolute -top-16 left-8">
+        <div className="absolute -top-16 left-6 md:left-8">
           <div className="relative group/profile">
             {/* Glow Effect */}
             <div className="absolute -inset-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover/profile:opacity-20 blur-lg transition-opacity duration-300"></div>
@@ -301,9 +301,9 @@ const ProfileImage = () => {
         </div>
 
         {/* User Info */}
-        <div className="ml-44 space-y-3">
+        <div className="ml-0 md:ml-44 space-y-2 md:space-y-3 text-left">
           {personalInfo?.username && (
-            <h2 className="text-3xl font-bold text-slate-800">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-800">
               {personalInfo.username}
             </h2>
           )}

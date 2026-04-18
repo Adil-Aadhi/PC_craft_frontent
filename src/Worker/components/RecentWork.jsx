@@ -44,8 +44,8 @@ export default function RecentProjects({ projects = [] }) {
         </div>
       </div>
 
-      {/* Projects List */}
-      <div className="space-y-4">
+      {/* Projects List with Horizontal Scroll on Mobile */}
+      <div className="flex flex-row overflow-x-auto pb-2 gap-4 -mx-2 px-2 scrollbar-none sm:flex-col sm:overflow-visible sm:pb-0 sm:mx-0 sm:px-0 sm:space-y-4">
         {latestProjects.length === 0 ? (
           <div className="text-center py-12 px-4">
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8">
@@ -126,7 +126,7 @@ const ProjectRow = ({ project, color, index }) => {
 
   return (
     <div 
-      className="group relative bg-white rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-transparent animate-fadeIn"
+      className="group relative bg-white rounded-xl p-3 md:p-4 hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-transparent animate-fadeIn min-w-[280px] sm:min-w-0 flex-shrink-0 sm:flex-shrink"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {/* Background decoration */}
@@ -136,14 +136,14 @@ const ProjectRow = ({ project, color, index }) => {
         {/* Left Section - Project Info */}
         <div className="flex items-start gap-3 flex-1">
           {/* Project Avatar with Gradient */}
-          <div className={`w-12 h-12 bg-gradient-to-br ${color} rounded-xl shadow-lg flex items-center justify-center text-white font-bold text-lg transform group-hover:scale-110 transition-transform duration-300`}>
+          <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${color} rounded-xl shadow-lg flex items-center justify-center text-white font-bold text-base md:text-lg transform group-hover:scale-110 transition-transform duration-300`}>
             {getInitials(project_name)}
           </div>
 
           {/* Project Details */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+              <h3 className="font-bold text-sm md:text-base text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-1">
                 {project_name}
               </h3>
               {status && (
@@ -153,15 +153,15 @@ const ProjectRow = ({ project, color, index }) => {
               )}
             </div>
             
-            <div className="space-y-1">
-              <p className="text-sm text-gray-600 flex items-center gap-1">
-                <FiUser className="text-gray-400" size={14} />
+            <div className="space-y-0.5 md:space-y-1">
+              <p className="text-xs md:text-sm text-gray-600 flex items-center gap-1">
+                <FiUser className="text-gray-400" size={12} />
                 <span className="font-medium">Client:</span> {client_name}
               </p>
               
               {deadline && (
-                <p className="text-sm text-gray-600 flex items-center gap-1">
-                  <FiClock className="text-gray-400" size={14} />
+                <p className="text-xs md:text-sm text-gray-600 flex items-center gap-1">
+                  <FiClock className="text-gray-400" size={12} />
                   <span className="font-medium">Deadline:</span> {deadline}
                 </p>
               )}
@@ -186,10 +186,10 @@ const ProjectRow = ({ project, color, index }) => {
         </div>
 
         {/* Right Section - Price */}
-        <div className="text-right ml-4">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-2 rounded-xl border border-green-100">
-            <p className="text-xs text-gray-500 mb-0.5">Budget</p>
-            <p className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
+        <div className="text-right ml-2 md:ml-4">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-2 py-1 md:px-4 md:py-2 rounded-xl border border-green-100">
+            <p className="text-[10px] md:text-xs text-gray-500 mb-0">Budget</p>
+            <p className="font-bold text-base md:text-lg text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
               {formatPrice(price)}
             </p>
           </div>
@@ -204,8 +204,8 @@ const ProjectRow = ({ project, color, index }) => {
         </div>
       </div>
 
-      {/* Bottom Border Animation */}
-      <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+      {/* Bottom Border Animation - Desktop Only */}
+      <div className="hidden sm:block absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
     </div>
   );
 };
@@ -226,6 +226,17 @@ style.textContent = `
   
   .animate-fadeIn {
     animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 `;
 document.head.appendChild(style);

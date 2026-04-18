@@ -182,8 +182,8 @@ export default function WorkerProjectExecution() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="min-h-screen py-10 px-4">
-      <div className="ms-5">
+    <div className="min-h-screen py-6 md:py-10 px-2 md:px-4">
+      <div className="mx-2 md:mx-5">
          {/* Back Button */}
         <div className="mt-5 mb-5">
           <button
@@ -194,17 +194,17 @@ export default function WorkerProjectExecution() {
           </button>
         </div>
         {/* HEADER */}
-       <div className="bg-white rounded-2xl shadow-md mb-8 p-6 border border-gray-100">
+       <div className="bg-white rounded-2xl shadow-md mb-6 md:mb-8 p-4 md:p-6 border border-gray-100">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
               {/* Left */}
               <div className="flex items-center gap-4">
-                <div className="bg-indigo-100 p-3 rounded-xl">
-                  <FaTools className="text-indigo-600 text-2xl" />
+                <div className="bg-indigo-100 p-2.5 md:p-3 rounded-xl">
+                  <FaTools className="text-indigo-600 text-xl md:text-2xl" />
                 </div>
 
                 <div>
-                  <h1 className="text-2xl font-semibold text-gray-800">
+                  <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
                     Project Execution
                   </h1>
                   <p className="text-sm text-gray-500">
@@ -215,7 +215,7 @@ export default function WorkerProjectExecution() {
 
               {/* Status Badge */}
               <span
-                className={`px-4 py-1.5 rounded-full text-sm font-medium ${
+                className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs md:text-sm font-medium ${
                   order?.status === "CANCELLED"
                     ? "bg-red-100 text-red-600"
                     : order?.status === "COMPLETED"
@@ -253,18 +253,18 @@ export default function WorkerProjectExecution() {
                   key={component.id}
                   variants={cardVariants}
                   whileHover={{ y: -4 }}
-                  className="bg-white rounded-2xl shadow-lg p-6 flex items-center justify-between"
+                  className="bg-white rounded-xl md:rounded-2xl shadow-md md:shadow-lg p-3 md:p-6 flex flex-row items-center justify-between gap-2 md:gap-4"
                 >
-                  <div className="flex items-center gap-6">
-                    <div className={`bg-gradient-to-br ${gradient} p-4 rounded-xl`}>
-                      <Icon className="text-white text-2xl" />
+                  <div className="flex items-center gap-3 md:gap-6">
+                    <div className={`bg-gradient-to-br ${gradient} p-2.5 md:p-4 rounded-xl`}>
+                      <Icon className="text-white text-xl md:text-2xl" />
                     </div>
 
                     <div>
-                      <h3 className="font-bold text-lg">
+                      <h3 className="font-bold text-sm md:text-lg leading-tight">
                         {component.name}
                       </h3>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-gray-600 text-xs md:text-sm">
                         ₹ {component.price?.toLocaleString()}
                       </p>
                     </div>
@@ -275,7 +275,7 @@ export default function WorkerProjectExecution() {
                     onClick={() =>
                       handleVerify(component.key)
                     }
-                    className={`px-6 py-2 rounded-xl font-semibold flex items-center gap-2 transition ${
+                    className={`px-3 py-1.5 md:px-6 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold flex items-center gap-1.5 md:gap-2 transition shrink-0 ${
                       component.verified
                         ? "bg-green-100 text-green-700"
                         : "bg-indigo-600 hover:bg-indigo-700 text-white"
@@ -303,22 +303,22 @@ export default function WorkerProjectExecution() {
 
           {/* PROGRESS PANEL */}
 <div className="lg:col-span-1">
-  <div className="sticky top-24 bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
+  <div className="sticky top-24 bg-white rounded-2xl md:rounded-3xl shadow-lg border border-gray-100 p-5 md:p-8">
 
     {/* Header */}
-    <div className="flex items-center justify-between mb-8">
-      <h2 className="font-semibold text-lg text-gray-800">
+    <div className="flex items-center justify-between mb-6 md:mb-8">
+      <h2 className="font-semibold text-base md:text-lg text-gray-800">
         Build Progress
       </h2>
-      <span className="text-sm text-gray-500">
+      <span className="text-xs md:text-sm text-gray-500">
         {verifiedCount}/{components.length}
       </span>
     </div>
 
     {/* Vertical Progress Section */}
-    <div className="flex justify-center mb-8">
+    <div className="flex justify-center mb-6 md:mb-8">
 
-      <div className="relative h-56 w-20 bg-gray-100 rounded-2xl overflow-hidden shadow-inner">
+      <div className="relative h-40 md:h-56 w-16 md:w-20 bg-gray-100 rounded-2xl overflow-hidden shadow-inner">
 
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,_#000_1px,_transparent_0)] bg-[length:10px_10px]" />
@@ -339,10 +339,10 @@ export default function WorkerProjectExecution() {
 
     {/* Info Text */}
     <div className="text-center mb-6">
-      <p className="text-sm text-gray-500">
+      <p className="text-xs md:text-sm text-gray-500">
         Components Verified
       </p>
-      <p className="text-lg font-semibold text-gray-800">
+      <p className="text-base md:text-lg font-semibold text-gray-800">
         {verifiedCount} of {components.length}
       </p>
     </div>

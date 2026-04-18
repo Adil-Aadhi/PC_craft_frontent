@@ -5,11 +5,11 @@ import { fetchMyOrders } from "../../Customer/Build/redux/components/orders/orde
 import StatusCard from "../components/StatusCard";
 import BuildDetailsModal from "../../cart/components/cartcomponentmodel";
 import {
-  Clock, Cpu, CreditCard, XCircle, ShieldCheck, Package, Calendar, Hash, Eye, Zap, Server, HardDrive, ChevronRight,Star , Gamepad2,FileText
+  Clock, Cpu, CreditCard, XCircle, ShieldCheck, Package, Calendar, Hash, Eye, Zap, Server, HardDrive, ChevronRight, Star, Gamepad2, FileText
 } from "lucide-react";
 import { toast } from "react-toastify";
-import api from "../../api/axios"; 
-import {useAuth} from "../../context/AuthContext"
+import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext"
 import ExecutionProgressModal from "../../project/components/ExecutionProgressModal";
 import ReviewModal from "../components/ReviewModal";
 
@@ -18,11 +18,11 @@ const OrdersPage = () => {
   const dispatch = useDispatch();
   const { orders, loading } = useSelector((state) => state.orders);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const {user}=useAuth()
+  const { user } = useAuth()
   const [cancelOrderId, setCancelOrderId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [progressData, setProgressData] = useState(null);
-  const [reviewOrder, setReviewOrder] = useState(null); 
+  const [reviewOrder, setReviewOrder] = useState(null);
 
   useEffect(() => {
     dispatch(fetchMyOrders());
@@ -46,85 +46,85 @@ const OrdersPage = () => {
   const filteredOrders = orders;
 
   const loadRazorpay = () => {
-      return new Promise((resolve) => {
-        if (window.Razorpay) {
-          resolve(true);
-          return;
-        }
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
 
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.async = true;
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
 
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
 
-        document.body.appendChild(script);
-      });
-    };
+      document.body.appendChild(script);
+    });
+  };
 
   const handlePayment = async (orderId) => {
-        try {
-          const razorpayLoaded = await loadRazorpay();
-          if (!razorpayLoaded) {
-            toast.error("Razorpay SDK failed to load.");
-            return;
-          }
-          const res = await api.post(
-            "/orders/create-razorpay-order/",
-            { order_id: orderId },
-          );
+    try {
+      const razorpayLoaded = await loadRazorpay();
+      if (!razorpayLoaded) {
+        toast.error("Razorpay SDK failed to load.");
+        return;
+      }
+      const res = await api.post(
+        "/orders/create-razorpay-order/",
+        { order_id: orderId },
+      );
 
-          const { razorpay_order_id, amount, key } = res.data;
+      const { razorpay_order_id, amount, key } = res.data;
 
-          const options = {
-              key: key,
-              amount: amount,
-              currency: "INR",
-              name: "PC-Craft",
-              description: "PC Build Order Payment",
-              order_id: razorpay_order_id,
+      const options = {
+        key: key,
+        amount: amount,
+        currency: "INR",
+        name: "PC-Craft",
+        description: "PC Build Order Payment",
+        order_id: razorpay_order_id,
 
-              handler: async function (response) {
-                await api.post("/orders/verify-razorpay-payment/", {
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                });
-
-                toast.success("Payment successful ✅");
-                dispatch(fetchMyOrders());
-              },
-
-              modal: {
-                ondismiss: function () {
-                  toast.error("Payment cancelled ❌");
-                }
-              },
-
-              prefill: {
-                name: user.name,
-                email: user.email,
-              },
-
-              theme: {
-                color: "#6366f1",
-              },
-            };
-
-          // 4️⃣ Open Razorpay modal
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-          rzp.on("payment.failed", function (response) {
-            console.error(response.error);
-            toast.error("Payment failed ❌");
+        handler: async function (response) {
+          await api.post("/orders/verify-razorpay-payment/", {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
           });
 
-        } catch (error) {
-          console.error(error);
-          toast.error("Payment initialization failed");
-        }
+          toast.success("Payment successful ✅");
+          dispatch(fetchMyOrders());
+        },
+
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment cancelled ❌");
+          }
+        },
+
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+
+        theme: {
+          color: "#6366f1",
+        },
       };
+
+      // 4️⃣ Open Razorpay modal
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+      rzp.on("payment.failed", function (response) {
+        console.error(response.error);
+        toast.error("Payment failed ❌");
+      });
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Payment initialization failed");
+    }
+  };
 
   const handleCancel = async () => {
     try {
@@ -228,31 +228,31 @@ const OrdersPage = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
+          className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
         >
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
-              <Zap className="w-4 h-4" />
+          <div className="space-y-3 md:space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs md:text-sm font-medium">
+              <Zap className="w-3.5 h-3.5 md:w-4 md:h-4" />
               <span>Order Dashboard</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
               Command Center
             </h1>
-            <p className="text-zinc-400 text-lg flex items-center gap-2 max-w-xl">
+            <p className="text-zinc-400 text-sm md:text-lg flex items-center gap-2 max-w-xl">
               Track, manage, and oversee the status of your premium custom PC builds.
             </p>
           </div>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="px-6 py-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl flex items-center gap-4 group"
+            className="px-4 py-3 md:px-6 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl backdrop-blur-xl flex items-center gap-3 md:gap-4 group"
           >
-            <div className="p-3 bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors border border-blue-500/20 rounded-xl">
-              <Package className="w-6 h-6 text-blue-400" />
+            <div className="p-2 md:p-3 bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors border border-blue-500/20 rounded-lg md:rounded-xl">
+              <Package className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
             </div>
             <div>
-              <p className="text-sm text-zinc-400 font-medium">Total Orders</p>
-              <p className="text-2xl font-bold font-mono tracking-tight">{orders.length}</p>
+              <p className="text-[10px] md:text-sm text-zinc-400 font-medium">Total Orders</p>
+              <p className="text-xl md:text-2xl font-bold font-mono tracking-tight">{orders.length}</p>
             </div>
           </motion.div>
         </motion.div>
@@ -262,10 +262,10 @@ const OrdersPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12"
+          className="grid grid-cols-2 gap-2 md:gap-4 mb-8 md:mb-12"
         >
           <StatusCard
-            title="Ready / Shipped"
+            title="Ready"
             count={completed}
             color="green"
             icon="completed"
@@ -302,7 +302,7 @@ const OrdersPage = () => {
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              className="space-y-6"
+              className="space-y-4 md:space-y-6"
             >
               {filteredOrders.map((order) => {
                 const styles = getStatusStyles(order.status);
@@ -319,43 +319,45 @@ const OrdersPage = () => {
                     <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-blue-500/0 rounded-[24px] opacity-0 group-hover:from-blue-500/30 group-hover:via-purple-500/30 group-hover:to-blue-500/30 group-hover:opacity-100 blur-[10px] transition-all duration-700 pointer-events-none" />
 
                     {/* Card Content */}
-                    <div className="relative bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-[24px] overflow-hidden p-6 hover:bg-zinc-900/80 transition-all duration-500">
+                    <div className="relative bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[24px] overflow-hidden p-4 md:p-6 hover:bg-zinc-900/80 transition-all duration-500">
 
                       {/* Top Header Row */}
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
                         <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-2xl font-bold text-white tracking-tight">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3 md:mb-2">
+                            <h3 className="text-lg md:text-2xl font-bold text-white tracking-tight">
                               {order.build?.build_name || "Custom PC Build"}
                             </h3>
-                            <div className={`px-3 py-1 rounded-full border text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${styles.bg} ${styles.border} ${styles.text} ${styles.glow}`}>
-                              <StatusIcon className="w-3.5 h-3.5" />
+                            <div className={`w-fit px-2 py-0.5 md:px-3 md:py-1 rounded-full border text-[10px] md:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${styles.bg} ${styles.border} ${styles.text} ${styles.glow}`}>
+                              <StatusIcon className="w-3 md:w-3.5 h-3 md:h-3.5" />
                               {getStatusDisplay(order.status)}
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-zinc-500 font-mono">
-                            <span className="flex items-center gap-1.5 bg-white/5 py-1 px-2.5 rounded-lg border border-white/5">
-                              <Hash className="w-4 h-4 text-zinc-400" />
+                          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-[10px] md:text-sm font-medium text-zinc-500 font-mono">
+                            <span className="flex items-center gap-1.5 bg-white/5 py-1 px-2 md:px-2.5 rounded-lg border border-white/5">
+                              <Hash className="w-3.5 h-3.5 md:w-4 md:h-4 text-zinc-400" />
                               <span className="text-zinc-300">ODR{order.order_id.slice(0, 8).toUpperCase()}</span>
                             </span>
                             <span className="flex items-center gap-1.5">
-                              <Calendar className="w-4 h-4 text-zinc-400" />
-                              {order.created_at
-                                ? new Date(order.created_at).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })
-                                : "N/A"}
+                              <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-zinc-400" />
+                              <span className="text-[10px] md:text-sm">
+                                {order.created_at
+                                  ? new Date(order.created_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })
+                                  : "N/A"}
+                              </span>
                             </span>
                           </div>
                         </div>
 
                         {/* Price Block */}
-                        <div className="text-left md:text-right p-4 bg-white/5 rounded-2xl border border-white/5 w-full md:w-auto">
-                          <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-1">Total Payload</p>
-                          <p className="text-3xl font-black bg-gradient-to-br from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+                        <div className="text-left md:text-right p-3 md:p-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/5 w-full md:w-auto">
+                          <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mb-0.5 md:mb-1">Total Payload</p>
+                          <p className="text-xl md:text-3xl font-black bg-gradient-to-br from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
                             ₹{order.total_price?.toLocaleString("en-IN") || "0"}
                           </p>
                         </div>
@@ -363,54 +365,54 @@ const OrdersPage = () => {
 
                       {/* Hardware Specs Grid */}
                       {order.build && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 bg-black/20 p-4 rounded-2xl border border-white/5">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-6 bg-black/20 p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5">
                           {order.build.cpu && (
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                                <Cpu className="w-5 h-5 text-blue-400" />
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <div className="p-1.5 md:p-2 bg-blue-500/10 rounded-lg md:rounded-xl border border-blue-500/20">
+                                <Cpu className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
                               </div>
                               <div className="overflow-hidden">
-                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Processor</p>
-                                <p className="text-sm font-medium text-zinc-200 truncate pr-2">
+                                <p className="text-[8px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Processor</p>
+                                <p className="text-[10px] md:text-sm font-medium text-zinc-200 truncate pr-2">
                                   {order.build.cpu.name.split(" ").slice(0, 3).join(" ")}
                                 </p>
                               </div>
                             </div>
                           )}
                           {order.build.gpu && (
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                                <Server className="w-5 h-5 text-purple-400" />
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <div className="p-1.5 md:p-2 bg-purple-500/10 rounded-lg md:rounded-xl border border-purple-500/20">
+                                <Server className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
                               </div>
                               <div className="overflow-hidden">
-                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Graphics</p>
-                                <p className="text-sm font-medium text-zinc-200 truncate pr-2">
+                                <p className="text-[8px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Graphics</p>
+                                <p className="text-[10px] md:text-sm font-medium text-zinc-200 truncate pr-2">
                                   {order.build.gpu.name.split(" ").slice(0, 3).join(" ")}
                                 </p>
                               </div>
                             </div>
                           )}
                           {order.build.ram && (
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
-                                <Zap className="w-5 h-5 text-yellow-400" />
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <div className="p-1.5 md:p-2 bg-yellow-500/10 rounded-lg md:rounded-xl border border-yellow-500/20">
+                                <Zap className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
                               </div>
                               <div className="overflow-hidden">
-                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Memory</p>
-                                <p className="text-sm font-medium text-zinc-200">
+                                <p className="text-[8px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Memory</p>
+                                <p className="text-[10px] md:text-sm font-medium text-zinc-200">
                                   {order.build.ram.capacity_gb}GB RAM
                                 </p>
                               </div>
                             </div>
                           )}
                           {order.build.storage && (
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                                <HardDrive className="w-5 h-5 text-emerald-400" />
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <div className="p-1.5 md:p-2 bg-emerald-500/10 rounded-lg md:rounded-xl border border-emerald-500/20">
+                                <HardDrive className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
                               </div>
                               <div className="overflow-hidden">
-                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Storage</p>
-                                <p className="text-sm font-medium text-zinc-200 truncate pr-2">
+                                <p className="text-[8px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Storage</p>
+                                <p className="text-[10px] md:text-sm font-medium text-zinc-200 truncate pr-2">
                                   {order.build.storage.capacity_gb}GB
                                 </p>
                               </div>
@@ -423,118 +425,118 @@ const OrdersPage = () => {
                       <div className="flex flex-col sm:flex-row justify-end items-center gap-3">
 
                         {order.status === "COMPLETED" && !order.review && (
-                            <button
-                              onClick={() => setReviewOrder(order)}
-                              className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
-                            >
-                              ⭐ Rate Worker
-                            </button>
-                          )}
-
-                          {order.review && (
-                              <div className="mt-2 flex flex-col gap-1">
-
-                                {/* Label */}
-                                <span className="text-xs text-zinc-400 font-medium">
-                                  Your Rating
-                                </span>
-
-                                {/* Stars */}
-                                <div className="flex items-center gap-2">
-                                  {[1,2,3,4,5].map((star)=>(
-                                    <Star
-                                      key={star}
-                                      size={18}
-                                      className={
-                                        star <= order.review.rating
-                                          ? "text-yellow-400 fill-yellow-400"
-                                          : "text-gray-300"
-                                      }
-                                    />
-                                  ))}
-                                </div>
-
-                              </div>
-                            )}
-
-                          {/* Inspect Blueprint (modal) */}
-                          {order.status=="BUILD_IN_PROGRESS" &&(
-                            <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                           onClick={async () => {
-                                const res = await api.get(
-                                  `/orders/worker-project/${order.order_id}/component/progress/`
-                                );
-                                setProgressData(res.data);
-                                setShowModal(true);
-                              }}
-                            className="w-full sm:w-auto px-6 py-3 bg-orange-400 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition border border-white/10 flex items-center justify-center gap-2"
+                          <button
+                            onClick={() => setReviewOrder(order)}
+                            className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
                           >
-                            <Eye className="w-4 h-4" />
-                             View Detailed Progress
-                          </motion.button>
-                          )}
+                            ⭐ Rate Worker
+                          </button>
+                        )}
+
+                        {order.review && (
+                          <div className="mt-2 flex flex-col gap-1">
+
+                            {/* Label */}
+                            <span className="text-xs text-zinc-400 font-medium">
+                              Your Rating
+                            </span>
+
+                            {/* Stars */}
+                            <div className="flex items-center gap-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  size={18}
+                                  className={
+                                    star <= order.review.rating
+                                      ? "text-yellow-400 fill-yellow-400"
+                                      : "text-gray-300"
+                                  }
+                                />
+                              ))}
+                            </div>
+
+                          </div>
+                        )}
+
+                        {/* Inspect Blueprint (modal) */}
+                        {order.status == "BUILD_IN_PROGRESS" && (
                           <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => setSelectedOrder(order)}
-                            className="w-full sm:w-auto px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-semibold transition border border-white/10 flex items-center justify-center gap-2"
+                            onClick={async () => {
+                              const res = await api.get(
+                                `/orders/worker-project/${order.order_id}/component/progress/`
+                              );
+                              setProgressData(res.data);
+                              setShowModal(true);
+                            }}
+                            className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-3 bg-orange-400 hover:bg-orange-600 text-white rounded-xl text-xs md:text-sm font-semibold transition border border-white/10 flex items-center justify-center gap-2"
                           >
                             <Eye className="w-4 h-4" />
-                            Inspect Blueprint
+                            View Detailed Progress
                           </motion.button>
+                        )}
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setSelectedOrder(order)}
+                          className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs md:text-sm font-semibold transition border border-white/10 flex items-center justify-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          Inspect Blueprint
+                        </motion.button>
 
-                          {/* 📄 View Quotation */}
-                          {order.quotation_pdf && order.status=="PAYMENT_PENDING" && (
-                            <a
-                              href={order.quotation_pdf}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full sm:w-auto px-6 py-3 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-xl text-sm font-semibold border border-emerald-500/30 flex items-center justify-center gap-2 transition"
-                            >
-                              <FileText className="w-4 h-4" />
-                              View Quotation
-                            </a>
-                          )}
-                          {order.invoice_pdf && (
-                            <a
-                              href={order.invoice_pdf}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-6 py-3 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-sm font-semibold border border-blue-500/30 flex items-center gap-2"
-                            >
-                              Download Invoice
-                            </a>
-                          )}
-                          
+                        {/* 📄 View Quotation */}
+                        {order.quotation_pdf && order.status == "PAYMENT_PENDING" && (
+                          <a
+                            href={order.quotation_pdf}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-3 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-xl text-xs md:text-sm font-semibold border border-emerald-500/30 flex items-center justify-center gap-2 transition"
+                          >
+                            <FileText className="w-4 h-4" />
+                            View Quotation
+                          </a>
+                        )}
+                        {order.invoice_pdf && (
+                          <a
+                            href={order.invoice_pdf}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-3 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-xs md:text-sm font-semibold border border-blue-500/30 flex items-center gap-2"
+                          >
+                            Download Invoice
+                          </a>
+                        )}
 
-                          {order.status === "PAYMENT_PENDING" && (
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() =>setCancelOrderId(order.order_id)}
-                                className="w-full sm:w-auto px-6 py-3 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white rounded-xl text-sm font-bold border border-red-500/40 flex items-center justify-center gap-2"
-                              >
-                                Cancel Order
-                              </motion.button>
-                            )}
 
-                          {/* 💳 Pay Now */}
-                          {order.status === "PAYMENT_PENDING" && (
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => handlePayment(order.order_id)}
-                              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_-5px_rgba(79,70,229,0.5)] flex items-center justify-center gap-2 border border-indigo-500/50"
-                            >
-                              <CreditCard className="w-4 h-4" />
-                              Initialize Payment
-                              <ChevronRight className="w-4 h-4" />
-                            </motion.button>
-                          )}
+                        {order.status === "PAYMENT_PENDING" && (
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setCancelOrderId(order.order_id)}
+                            className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-3 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white rounded-xl text-xs md:text-bold border border-red-500/40 flex items-center justify-center gap-2"
+                          >
+                            Cancel Order
+                          </motion.button>
+                        )}
 
-                        </div>
+                        {/* 💳 Pay Now */}
+                        {order.status === "PAYMENT_PENDING" && (
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handlePayment(order.order_id)}
+                            className="w-full sm:w-auto px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs md:text-bold shadow-[0_0_20px_-5px_rgba(79,70,229,0.5)] flex items-center justify-center gap-2 border border-indigo-500/50"
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            Initialize Payment
+                            <ChevronRight className="w-4 h-4" />
+                          </motion.button>
+                        )}
+
+                      </div>
 
                     </div>
                   </motion.div>
@@ -553,46 +555,46 @@ const OrdersPage = () => {
           />
         )}
         <AnimatePresence>
-              {cancelOrderId && (
-                <motion.div
-                  className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-md"
+          {cancelOrderId && (
+            <motion.div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-md"
+              >
+                <h2 className="text-xl font-bold text-white mb-4">
+                  Cancel this order?
+                </h2>
+
+                <p className="text-zinc-400 mb-6">
+                  This action cannot be undone. Your order will be permanently cancelled.
+                </p>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setCancelOrderId(null)}
+                    className="px-5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10"
                   >
-                    <h2 className="text-xl font-bold text-white mb-4">
-                      Cancel this order?
-                    </h2>
+                    No
+                  </button>
 
-                    <p className="text-zinc-400 mb-6">
-                      This action cannot be undone. Your order will be permanently cancelled.
-                    </p>
-
-                    <div className="flex justify-end gap-3">
-                      <button
-                        onClick={() => setCancelOrderId(null)}
-                        className="px-5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10"
-                      >
-                        No
-                      </button>
-
-                      <button
-                        onClick={handleCancel}
-                        className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold"
-                      >
-                        Yes, Cancel
-                      </button>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <button
+                    onClick={handleCancel}
+                    className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold"
+                  >
+                    Yes, Cancel
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </div>
       <ExecutionProgressModal
@@ -601,12 +603,12 @@ const OrdersPage = () => {
         progressData={progressData}
       />
       {reviewOrder && (
-      <ReviewModal
-        order={reviewOrder}
-        onClose={() => setReviewOrder(null)}
-        onReviewSuccess={() => dispatch(fetchMyOrders())}
-      />
-    )}
+        <ReviewModal
+          order={reviewOrder}
+          onClose={() => setReviewOrder(null)}
+          onReviewSuccess={() => dispatch(fetchMyOrders())}
+        />
+      )}
     </div>
   );
 };

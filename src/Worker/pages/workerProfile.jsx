@@ -35,28 +35,32 @@ const WorkerProfile = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="min-h-screen bg-gray-100 px-6 pt-6"
+      className="min-h-screen bg-transparent md:bg-gray-100 px-3 md:px-6 pt-2 md:pt-6"
     >
       {/* Header Row */}
-      <div className="max-w-4xl mx-auto mb-6 mt-10 flex items-center justify-between">
-        <ProfileTabs
-          active={activeSection}
-          setActive={setActiveSection}
-        />
+      <div className="max-w-4xl mx-auto mb-6 mt-4 md:mt-10 flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <ProfileTabs
+            active={activeSection}
+            setActive={setActiveSection}
+          />
+        </div>
 
         {/* Close Button */}
         <motion.button
           whileTap={{ scale: 0.9, rotate: 90 }}
           onClick={() => navigate("/worker/dashboard")}
           className="
-            ml-4 p-2 rounded-full
+            p-2.5 rounded-xl
+            bg-white/70 backdrop-blur-md
             text-gray-600 hover:text-gray-900
-            hover:bg-white/70
-            transition
+            border border-gray-200/60
+            shadow-lg shadow-black/5
+            transition shrink-0
           "
           aria-label="Close profile"
         >
-          <FiX className="w-5 h-5" />
+          <FiX className="w-5 h-5 md:w-5 md:h-5" />
         </motion.button>
       </div>
 
@@ -76,7 +80,7 @@ const WorkerProfile = () => {
         )}
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto p-6 relative overflow-hidden">
+      <div className="max-w-4xl mx-auto p-0 md:p-6 relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeSection}

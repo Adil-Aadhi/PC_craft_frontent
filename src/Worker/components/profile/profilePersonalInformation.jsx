@@ -82,7 +82,7 @@ const WorkerPersonalInfo = () => {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border p-6">
+    <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-semibold text-slate-800">
