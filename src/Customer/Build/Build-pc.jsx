@@ -38,6 +38,7 @@ const BuildPC = () => {
   const [showPartsModal, setShowPartsModal] = useState(false);
   const [showCartSheet, setShowCartSheet] = useState(false);
   const [cartExpanded, setCartExpanded] = useState(false);
+  const isMobiles = window.innerWidth < 768;
 
   const cpu = componentsState.cpu;
   const motherboard = componentsState.motherboard;
@@ -323,7 +324,10 @@ const BuildPC = () => {
     });
   }, [componentData, aiComponents, dispatch]);
 
-  if (isInitialLoading) return <PCBuilderLoader />;
+  if (isInitialLoading) {
+    if (isMobiles) return null;   // 🔥 hide on mobile
+    return <PCBuilderLoader />;
+  }
   if (error) return <p className="text-red-500">{error}</p>;
 
   const renderLeftPanel = () => (
@@ -471,9 +475,8 @@ const BuildPC = () => {
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: "100%", opacity: 0 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className={`absolute inset-x-0 bottom-0 z-40 overflow-hidden rounded-t-[32px] border border-white/10 bg-zinc-900/30 shadow-[0_-20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl ${
-                    cartExpanded ? "h-[90vh]" : "h-[38vh]"
-                  }`}
+                  className={`absolute inset-x-0 bottom-0 z-40 overflow-hidden rounded-t-[32px] border border-white/10 bg-zinc-900/30 shadow-[0_-20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl ${cartExpanded ? "h-[90vh]" : "h-[38vh]"
+                    }`}
                 >
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
                     <button
@@ -617,9 +620,8 @@ const BuildPC = () => {
 
       <button
         onClick={() => setShowAiModal(true)}
-        className={`fixed z-40 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:-rotate-3 hover:scale-110 hover:shadow-indigo-500/60 active:scale-95 ${
-          isMobile ? "bottom-6 left-6" : "bottom-6 right-6"
-        }`}
+        className={`fixed z-40 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:-rotate-3 hover:scale-110 hover:shadow-indigo-500/60 active:scale-95 ${isMobile ? "bottom-6 left-6" : "bottom-6 right-6"
+          }`}
         aria-label="Open AI assistant"
       >
         <Bot size={22} strokeWidth={1.75} />
