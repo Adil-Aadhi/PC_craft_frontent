@@ -33,7 +33,7 @@ export default function WorkerLayout() {
       : "bg-gray-100";
 
   const contentSpacingClass =
-    isNotificationsPage || isChatPage ? "p-0" : "px-2 sm:px-4 pb-4 pt-2";
+    isNotificationsPage || isChatPage ? "p-0" : "px-2 sm:px-4 pb-4 pt-20 md:pt-24";
 
   return (
     <div className={`min-h-screen ${layoutBgClass} relative overflow-x-hidden`}>

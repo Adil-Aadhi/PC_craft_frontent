@@ -118,15 +118,15 @@ const COMPONENT_STEPS = [
               className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto"
             >
               {/* Header with gradient */}
-              <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                    <Package className="w-5 h-5 text-white" />
+              <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between rounded-t-2xl">
+                <div className="flex items-center space-x-2 md:space-x-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <Package className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">PC Build Components</h2>
+                    <h2 className="text-lg md:text-xl font-bold text-white">PC Build Components</h2>
                     {c?.build_name && (
-                      <p className="text-sm text-white/80 flex items-center">
+                      <p className="text-xs md:text-sm text-white/80 flex items-center">
                         <ChevronRight className="w-3 h-3 mr-1" />
                         {c.build_name}
                       </p>
@@ -144,22 +144,22 @@ const COMPONENT_STEPS = [
               </div>
 
               {/* Content */}
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 {/* Build Info Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-6"
+                  className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-3 md:p-4 mb-4 md:mb-6"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Build Configuration</p>
-                      <p className="font-semibold text-gray-800">{c?.build_name || 'Custom Build'}</p>
+                      <p className="text-xs md:text-sm text-gray-600">Build Configuration</p>
+                      <p className="font-semibold text-sm md:text-base text-gray-800">{c?.build_name || 'Custom Build'}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-600">Total Value</p>
-                      <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                      <p className="text-xs md:text-sm text-gray-600">Total Value</p>
+                      <p className="text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                         ₹{order.total_price}
                       </p>
                     </div>
@@ -168,15 +168,15 @@ const COMPONENT_STEPS = [
 
                  {/* Build Progress */}
                     {progressData && (
-                    <motion.div className="mt-6 mb-6">
+                    <motion.div className="mt-4 md:mt-6 mb-4 md:mb-6">
 
-                        <h3 className="text-lg font-semibold mb-4">
+                        <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">
                         Build Progress
                         </h3>
 
                         {/* percentage bar */}
-                        <div className="mb-6">
-                        <div className="flex justify-between text-sm mb-1">
+                        <div className="mb-4 md:mb-6">
+                        <div className="flex justify-between text-xs md:text-sm mb-1">
                             <span>Build Completion</span>
                             <span className="font-semibold">
                             {progressData.progress}%
@@ -194,7 +194,7 @@ const COMPONENT_STEPS = [
                         </div>
 
                         {/* steps */}
-                        <div className="space-y-3">
+                        <div className="space-y-2 md:space-y-3">
                         {COMPONENT_STEPS.map((step) => {
 
                             const done = progressData[step.key];
@@ -202,22 +202,22 @@ const COMPONENT_STEPS = [
                             return (
                             <div
                                 key={step.key}
-                                className="flex items-center justify-between bg-gray-50 border rounded-lg px-4 py-3"
+                                className="flex items-center justify-between bg-gray-50 border rounded-lg px-3 md:px-4 py-2 md:py-3"
                             >
                                 <div className="flex items-center gap-2">
                                 {done ? (
-                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                    <CheckCircle className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-600" />
                                 ) : (
-                                    <Clock className="w-4 h-4 text-gray-400" />
+                                    <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400" />
                                 )}
 
-                                <span className="text-sm font-medium">
+                                <span className="text-xs md:text-sm font-medium">
                                     {step.label}
                                 </span>
                                 </div>
 
                                 <span
-                                className={`text-xs font-semibold px-2 py-1 rounded
+                                className={`text-[10px] md:text-xs font-semibold px-2 py-0.5 md:py-1 rounded
                                 ${done ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}
                                 >
                                 {done ? "Completed" : "Pending"}
@@ -235,7 +235,7 @@ const COMPONENT_STEPS = [
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-6"
                 >
                   {components.map((component, index) => (
                     <motion.div
@@ -244,17 +244,17 @@ const COMPONENT_STEPS = [
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + index * 0.05 }}
                       whileHover={{ scale: 1.02, x: 5 }}
-                      className={`bg-gray-50 rounded-xl p-3 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-300 ${
+                      className={`bg-gray-50 rounded-xl p-2 md:p-3 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-300 ${
                         !component.value ? 'opacity-50' : ''
                       }`}
                     >
-                      <div className="flex items-start space-x-3">
-                        <div className="p-2 bg-white rounded-lg shadow-sm">
+                      <div className="flex items-start space-x-2 md:space-x-3">
+                        <div className="p-1.5 md:p-2 bg-white rounded-lg shadow-sm">
                           {component.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-500">{component.label}</p>
-                          <p className="font-medium text-gray-800 truncate">
+                          <p className="text-[10px] md:text-xs text-gray-500">{component.label}</p>
+                          <p className="font-medium text-xs md:text-sm text-gray-800 truncate">
                             {component.value || 'Not specified'}
                           </p>
                         </div>
@@ -270,41 +270,41 @@ const COMPONENT_STEPS = [
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="bg-gray-50 rounded-xl p-4 mb-6"
+                  className="bg-gray-50 rounded-xl p-3 md:p-4 mb-4 md:mb-6"
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2 md:mb-3">
                     <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <DollarSign className="w-4 h-4 text-green-600" />
+                      <div className="p-1.5 md:p-2 bg-green-100 rounded-lg">
+                        <DollarSign className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-600" />
                       </div>
-                      <span className="font-medium text-gray-700">Total Components Price</span>
+                      <span className="font-medium text-sm md:text-base text-gray-700">Total Components Price</span>
                     </div>
-                    <span className="text-2xl font-bold text-green-600">₹{c?.total_price}</span>
+                    <span className="text-lg md:text-2xl font-bold text-green-600">₹{c?.total_price}</span>
                   </div>
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2 md:mb-3">
                     <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <DollarSign className="w-4 h-4 text-green-600" />
+                      <div className="p-1.5 md:p-2 bg-green-100 rounded-lg">
+                        <DollarSign className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-600" />
                       </div>
-                      <span className="font-medium text-gray-700">Service Charge</span>
+                      <span className="font-medium text-sm md:text-base text-gray-700">Service Charge</span>
                     </div>
-                    <span className="text-2xl font-bold text-green-600">₹{order.worker_earning}</span>
+                    <span className="text-lg md:text-2xl font-bold text-green-600">₹{order.worker_earning}</span>
                   </div>
-                  <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center justify-between mb-3 md:mb-5">
                     <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-green-100 rounded-lg"> 
-                        <DollarSign className="w-4 h-4 text-green-600" />
+                      <div className="p-1.5 md:p-2 bg-green-100 rounded-lg"> 
+                        <DollarSign className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-600" />
                       </div>
-                      <span className="font-medium text-gray-700">Platform Fee</span>
+                      <span className="font-medium text-sm md:text-base text-gray-700">Platform Fee</span>
                     </div>
-                    <span className="text-2xl font-bold text-green-600">₹{order.platform_fee}</span>
+                    <span className="text-lg md:text-2xl font-bold text-green-600">₹{order.platform_fee}</span>
                   </div>
                   <hr></hr>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mt-3 md:mt-5">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-700">Total Value</span>
+                      <span className="font-medium text-base md:text-lg text-gray-700">Total Value</span>
                     </div>
-                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">₹{order.total_price}</span>
+                    <span className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">₹{order.total_price}</span>
                   </div>
                 </motion.div>
 
@@ -313,15 +313,15 @@ const COMPONENT_STEPS = [
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200"
+                  className="flex flex-col sm:flex-row gap-2 md:gap-3 pt-3 md:pt-4 border-t border-gray-200"
                 >
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onClose}
-                    className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-200 transition-all duration-300 flex items-center justify-center space-x-2"
+                    className="flex-1 bg-gray-100 text-gray-700 py-2.5 md:py-3 px-4 md:px-6 rounded-lg md:rounded-xl text-sm md:text-base font-medium hover:bg-gray-200 transition-all duration-300 flex items-center justify-center space-x-2"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     <span>Close</span>
                   </motion.button>
                   {!order.payout_approved && (
@@ -329,9 +329,9 @@ const COMPONENT_STEPS = [
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => payment(order.order_id)}
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-medium flex items-center justify-center space-x-2 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-blue-500/25"
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 md:py-3 px-4 md:px-6 rounded-lg md:rounded-xl text-sm md:text-base font-medium flex items-center justify-center space-x-2 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-blue-500/25"
                     >
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       <span>Approve Payment</span>
                     </motion.button>
                   )}

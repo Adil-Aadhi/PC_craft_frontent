@@ -47,24 +47,27 @@ export default function StatsSection({ stats }) {
 
   const statCards = [
     {
-      icon: <Users size={24} />,
-      title: "Total Users",
+      icon: <Users className="w-4 h-4 md:w-6 md:h-6" />,
+      title: "Users",
+      titleDesktop: "Total Users",
       value: animatedStats.users,
       bgColor: "bg-blue-50",
       iconColor: "text-blue-600",
       borderColor: "border-blue-500"
     },
     {
-      icon: <UserCheck size={24} />,
-      title: "Total Workers",
+      icon: <UserCheck className="w-4 h-4 md:w-6 md:h-6" />,
+      title: "Workers",
+      titleDesktop: "Total Workers",
       value: animatedStats.workers,
       bgColor: "bg-emerald-50",
       iconColor: "text-emerald-600",
       borderColor: "border-emerald-500"
     },
     {
-      icon: <ShoppingCart size={24} />,
-      title: "Total Orders",
+      icon: <ShoppingCart className="w-4 h-4 md:w-6 md:h-6" />,
+      title: "Orders",
+      titleDesktop: "Total Orders",
       value: animatedStats.orders,
       bgColor: "bg-purple-50",
       iconColor: "text-purple-600",
@@ -72,10 +75,8 @@ export default function StatsSection({ stats }) {
     }
   ];
 
-
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-3 md:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
 
       {statCards.map((card, index) => (
         <StatCard key={index} {...card} />
@@ -87,20 +88,23 @@ export default function StatsSection({ stats }) {
 
 
 
-function StatCard({ icon, title, value, bgColor, iconColor, borderColor }) {
+function StatCard({ icon, title, titleDesktop, value, bgColor, iconColor, borderColor }) {
 
   return (
-    <div className={`bg-white rounded-2xl shadow-lg p-6 border-l-4 ${borderColor} hover:shadow-xl transition-all duration-300`}>
+    <div className={`bg-white rounded-xl md:rounded-2xl shadow-lg p-2 md:p-6 border-l-2 md:border-l-4 ${borderColor} hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row items-center justify-center md:justify-start`}>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 text-center md:text-left">
 
-        <div className={`${bgColor} p-3 rounded-xl`}>
+        <div className={`${bgColor} p-1.5 md:p-3 rounded-lg md:rounded-xl`}>
           <div className={iconColor}>{icon}</div>
         </div>
 
         <div>
-          <p className="text-gray-500 text-sm font-medium">{title}</p>
-          <h3 className="text-3xl font-bold text-gray-800">
+          <p className="text-gray-500 text-[9px] sm:text-xs md:text-sm font-medium">
+            <span className="md:hidden">{title}</span>
+            <span className="hidden md:inline">{titleDesktop}</span>
+          </p>
+          <h3 className="text-sm sm:text-base md:text-3xl font-bold text-gray-800">
             {value.toLocaleString()}
           </h3>
         </div>

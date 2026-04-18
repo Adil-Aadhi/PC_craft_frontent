@@ -38,9 +38,9 @@ export default function WorkerNavbar() {
       initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="sticky top-4 z-50 w-full flex justify-center"
+      className="fixed top-3 md:top-4 left-0 right-0 z-[100] flex justify-center px-4"
     >
-      <div className="w-full max-w-3xl bg-white/70 backdrop-blur-md border border-white/30 rounded-xl px-5 py-3 flex items-center justify-between shadow-md">
+      <div className="w-full max-w-4xl bg-white/70 backdrop-blur-xl border border-white/40 rounded-2xl px-5 py-3 flex items-center justify-between shadow-lg ring-1 ring-black/5">
 
         {/* Left */}
         <Link to="/worker/dashboard" className="flex items-center gap-1">

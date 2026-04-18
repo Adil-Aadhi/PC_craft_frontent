@@ -20,7 +20,8 @@ import SettingsModal from "./AdminSettingsModal";
 export default function AdminSidebar({sidebarExpanded,
   setSidebarExpanded,
   sidebarHovered,
-  setSidebarHovered}) {
+  setSidebarHovered,
+  onNavClick}) {
   const isExpanded = sidebarExpanded;
   const isHovered = sidebarHovered;
   const {user,handleLogout}=useAuth()
@@ -102,6 +103,7 @@ export default function AdminSidebar({sidebarExpanded,
             <NavLink
               key={index}
               to={item.path}
+              onClick={onNavClick}
               className={({ isActive }) => `
                 group/nav-item
                 relative flex items-center gap-4
@@ -169,7 +171,7 @@ export default function AdminSidebar({sidebarExpanded,
             <NavLink
               key={index}
               to={item.path || "#"}
-              onClick={item.onClick}
+              onClick={() => { item.onClick?.(); onNavClick?.(); }}
               className="
                 group/bottom-item
                 relative flex items-center gap-4

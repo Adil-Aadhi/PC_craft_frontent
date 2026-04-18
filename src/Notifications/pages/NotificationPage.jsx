@@ -28,7 +28,7 @@ const WorkerNotifications = () => {
         transition={{ duration: 0.35, ease: "easeOut" }}
         className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-0 py-2"
       >
-        <div className="flex items-center justify-between rounded-[26px] border border-slate-200/80 bg-white/80 px-4 py-3 mt-10 shadow-sm backdrop-blur-xl sm:px-5">
+        <div className="flex items-center justify-between rounded-[26px] border border-slate-200/80 bg-white/80 px-4 py-3 mt-24 shadow-sm backdrop-blur-xl sm:px-5">
           <div>
             <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">
               Activity Center

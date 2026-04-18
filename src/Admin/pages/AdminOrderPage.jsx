@@ -163,29 +163,29 @@ useEffect(() => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8"
+      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-2 md:p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       {/* Header Section with Premium Gradient */}
       <motion.div 
-        className="mb-8"
+        className="mb-4 md:mb-8"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col xl:flex-row md:items-start xl:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-2">
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-1 md:mb-2">
               Orders Overview
             </h1>
-            <p className="text-slate-600">Manage and track all customer orders</p>
+            <p className="text-sm md:text-base text-slate-600">Manage and track all customer orders</p>
           </div>
           
           {/* Stats Cards with Premium Design */}
           <motion.div 
-            className="flex gap-4"
+            className="grid grid-cols-3 md:flex gap-2 md:gap-4 w-full xl:w-auto"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -193,25 +193,25 @@ useEffect(() => {
             <motion.div 
               variants={statsVariants}
               whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg px-6 py-4 border border-white/50"
+              className="bg-white/80 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg p-2 md:px-6 md:py-4 border border-white/50 text-center md:text-left flex flex-col justify-center"
             >
-              <p className="text-sm text-slate-500 flex items-center gap-2">
-                <Package className="w-4 h-4" />
-                Total Orders
+              <p className="text-[10px] md:text-sm text-slate-500 flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-2 whitespace-nowrap">
+                <Package className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="truncate">Total Orders</span>
               </p>
-              <p className="text-2xl font-bold text-slate-900">{orders.length}</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 mt-1 md:mt-0">{orders.length}</p>
             </motion.div>
             
             <motion.div 
               variants={statsVariants}
               whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg px-6 py-4 border border-white/50"
+              className="bg-white/80 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg p-2 md:px-6 md:py-4 border border-white/50 text-center md:text-left flex flex-col justify-center"
             >
-              <p className="text-sm text-slate-500 flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                Pending Payment
+              <p className="text-[10px] md:text-sm text-slate-500 flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-2 whitespace-nowrap">
+                <Clock className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="truncate">Pending</span>
               </p>
-              <p className="text-2xl font-bold text-amber-600">
+              <p className="text-lg md:text-2xl font-bold text-amber-600 mt-1 md:mt-0">
                 {orders.filter(o => o.status === 'PAYMENT_PENDING').length}
               </p>
             </motion.div>
@@ -219,13 +219,13 @@ useEffect(() => {
             <motion.div 
               variants={statsVariants}
               whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg px-6 py-4 border border-white/50"
+              className="bg-white/80 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg p-2 md:px-6 md:py-4 border border-white/50 text-center md:text-left flex flex-col justify-center"
             >
-              <p className="text-sm text-slate-500 flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
-                Completed
+              <p className="text-[10px] md:text-sm text-slate-500 flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-2 whitespace-nowrap">
+                <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="truncate">Completed</span>
               </p>
-              <p className="text-2xl font-bold text-emerald-600">
+              <p className="text-lg md:text-2xl font-bold text-emerald-600 mt-1 md:mt-0">
                 {orders.filter(o => o.status === 'COMPLETED').length}
               </p>
             </motion.div>
@@ -235,22 +235,22 @@ useEffect(() => {
 
       {/* Search and Filter Bar */}
       <motion.div 
-        className="mb-8"
+        className="mb-4 md:mb-8"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-white/50">
-          <div className="flex gap-4 items-center">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg p-2 md:p-4 border border-white/50">
+          <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-center">
             {/* Search Input */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <div className="flex-1 relative w-full">
+              <Search className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 md:w-5 md:h-5" />
               <input
                 type="text"
-                placeholder="Search by Order ID, Customer, or Build..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 transition-all outline-none bg-white/50"
+                className="w-full pl-9 md:pl-12 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-lg md:rounded-xl border border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 transition-all outline-none bg-white/50"
               />
               {searchTerm && (
                 <motion.button
@@ -265,10 +265,10 @@ useEffect(() => {
             </div>
 
             {/* Filter Dropdown */}
-            <div className="relative">
+            <div className="relative w-full md:w-auto flex gap-2 w-full">
               <motion.button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={`px-4 py-3 rounded-xl border flex items-center gap-2 transition-all ${
+                className={`flex-1 md:flex-none px-3 py-2.5 md:px-4 md:py-3 rounded-lg md:rounded-xl border flex items-center justify-center md:justify-start gap-2 transition-all text-sm md:text-base ${
                   selectedStatus !== "ALL" 
                     ? "bg-slate-900 text-white border-slate-900" 
                     : "bg-white/50 border-slate-200 text-slate-700 hover:border-slate-400"
@@ -276,10 +276,10 @@ useEffect(() => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Filter className="w-5 h-5" />
+                <Filter className="w-4 h-4 md:w-5 md:h-5" />
                 <span>Filter</span>
                 {selectedStatus !== "ALL" && (
-                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] md:text-xs">
                     1
                   </span>
                 )}
@@ -328,7 +328,6 @@ useEffect(() => {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
 
             {/* Clear Filters Button - Show only when filters are active */}
             {(searchTerm || selectedStatus !== "ALL") && (
@@ -337,7 +336,7 @@ useEffect(() => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 onClick={clearFilters}
-                className="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2"
+                className="flex-1 md:flex-none px-3 py-2.5 md:px-4 md:py-3 rounded-lg md:rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all flex items-center justify-center md:justify-start gap-2 text-sm md:text-base whitespace-nowrap"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -345,6 +344,7 @@ useEffect(() => {
                 <span>Clear</span>
               </motion.button>
             )}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -369,7 +369,7 @@ useEffect(() => {
             {orders.length > 0 ? (
               <motion.div 
                 key="orders-grid"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -386,22 +386,22 @@ useEffect(() => {
                         y: -8,
                         transition: { duration: 0.3 }
                       }}
-                      className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100 overflow-hidden"
+                      className="group bg-white rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100 overflow-hidden"
                     >
                       {/* Card Header with Premium Gradient */}
-                      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 py-4">
+                      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-3 md:px-6 md:py-4">
                         <div className="flex justify-between items-center">
                           <motion.span 
-                            className="text-white/90 font-mono text-sm flex items-center gap-2"
+                            className="text-white/90 font-mono text-xs md:text-sm flex items-center gap-1.5 md:gap-2"
                             initial={{ x: -10, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.1 }}
                           >
-                            <Package className="w-4 h-4" />
+                            <Package className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             #{order.id}
                           </motion.span>
                           <motion.span 
-                            className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 ${getStatusColor(order.status)}`}
+                            className={`px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium border flex items-center gap-1 md:gap-1.5 ${getStatusColor(order.status)}`}
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: "spring" }}
@@ -413,52 +413,52 @@ useEffect(() => {
                       </div>
 
                       {/* Card Body */}
-                      <div className="p-6">
+                      <div className="p-4 md:p-6">
                         {/* User Info */}
                         <motion.div 
-                          className="flex items-center space-x-3 mb-4"
+                          className="flex items-center space-x-2 md:space-x-3 mb-3 md:mb-4"
                           initial={{ x: -10, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ delay: 0.3 }}
                         >
                           <motion.div 
-                            className="w-12 h-12 bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center text-white font-semibold text-lg shadow-lg"
+                            className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg md:rounded-xl flex items-center justify-center text-white font-semibold text-base md:text-lg shadow-lg"
                             whileHover={{ rotate: 360 }}
                             transition={{ duration: 0.5 }}
                           >
                             {order.user_username?.charAt(0).toUpperCase() || "U"}
                           </motion.div>
                           <div>
-                            <p className="font-semibold text-slate-900 flex items-center gap-2">
-                              <User className="w-4 h-4 text-slate-500" />
+                            <p className="font-semibold text-sm md:text-base text-slate-900 flex items-center gap-1.5 md:gap-2">
+                              <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500" />
                               {order.user_username || "Unknown User"}
                             </p>
-                            <p className="text-sm text-slate-500">{order.user_email}</p>
+                            <p className="text-xs md:text-sm text-slate-500">{order.user_email}</p>
                           </div>
                         </motion.div>
 
                         {/* Order Details */}
                         <motion.div 
-                          className="space-y-3 mb-4"
+                          className="space-y-2 md:space-y-3 mb-4"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.4 }}
                         >
-                          <div className="flex justify-between items-center text-sm">
+                          <div className="flex justify-between items-center text-xs md:text-sm">
                             <span className="text-slate-600 flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
+                              <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
                               Order Date
                             </span>
                             <span className="font-medium text-slate-900">{formatDate(order.created_at)}</span>
                           </div>
                           
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center text-xs md:text-sm">
                             <span className="text-slate-600 flex items-center gap-1">
-                              <IndianRupee className="w-4 h-4" />
+                              <IndianRupee className="w-3.5 h-3.5 md:w-4 md:h-4" />
                               Total Amount
                             </span>
                             <motion.span 
-                              className="text-xl font-bold text-slate-900"
+                              className="text-lg md:text-xl font-bold text-slate-900"
                               initial={{ scale: 1 }}
                               animate={{ scale: [1, 1.05, 1] }}
                               transition={{ delay: 0.6, duration: 0.5 }}
@@ -468,9 +468,9 @@ useEffect(() => {
                           </div>
                           
                           {order.cart_item?.build_name && (
-                            <div className="flex justify-between items-center text-sm">
+                            <div className="flex justify-between items-center text-xs md:text-sm">
                               <span className="text-slate-600 flex items-center gap-1">
-                                <Settings className="w-4 h-4" />
+                                <Settings className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 Build
                               </span>
                               <span className="font-medium text-slate-900">{order.cart_item.build_name}</span>
@@ -481,14 +481,14 @@ useEffect(() => {
                         {/* Action Button */}
                         <motion.button
                           onClick={() => handleViewMore(order)}
-                          className="w-full bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 py-3 rounded-xl font-medium hover:from-slate-800 hover:to-slate-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                          className="w-full bg-gradient-to-r from-slate-900 to-slate-800 text-white px-3 py-2.5 md:px-4 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base font-medium hover:from-slate-800 hover:to-slate-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.5 }}
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           <span>View Details</span>
                         </motion.button>
                       </div>

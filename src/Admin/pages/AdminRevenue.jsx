@@ -49,20 +49,20 @@ export default function AdminRevenue() {
   };
 
   const StatCard = ({ title, value, icon: Icon, bgColor, textColor }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-lg ${bgColor}`}>
-          <Icon className={`h-6 w-6 ${textColor}`} />
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-300">
+      <div className="flex items-center justify-between mb-3 md:mb-4">
+        <div className={`p-2 md:p-3 rounded-lg ${bgColor}`}>
+          <Icon className={`h-5 w-5 md:h-6 md:w-6 ${textColor}`} />
         </div>
-        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+        <span className="text-[10px] md:text-xs font-medium text-gray-400 uppercase tracking-wider truncate ml-2">
           {title}
         </span>
       </div>
       <div className="space-y-1">
-        <h3 className="text-2xl font-bold text-gray-900">
+        <h3 className="text-lg md:text-2xl font-bold text-gray-900 truncate">
           {typeof value === 'number' && title !== 'Total Orders' ? formatCurrency(value) : value}
         </h3>
-        <p className="text-sm text-gray-500">{title}</p>
+        <p className="text-[10px] md:text-sm text-gray-500 truncate">{title}</p>
       </div>
     </div>
   );
@@ -84,12 +84,11 @@ export default function AdminRevenue() {
           <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Refresh
         </button>
       </div>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <StatCard
           title="Total Revenue"
           value={stats.total_revenue}
@@ -158,7 +157,7 @@ export default function AdminRevenue() {
             <div>
               <p className="text-sm font-medium text-indigo-600">This Month's Revenue</p>
               <p className="text-2xl font-bold text-indigo-900 mt-2">
-                {stats.monthly_revenue && stats.monthly_revenue.length > 0 
+                {stats.monthly_revenue && stats.monthly_revenue.length > 0
                   ? formatCurrency(stats.monthly_revenue[stats.monthly_revenue.length - 1].revenue)
                   : formatCurrency(0)}
               </p>
@@ -178,12 +177,12 @@ export default function AdminRevenue() {
             <h3 className="text-lg font-semibold text-gray-900">Monthly Revenue Trend</h3>
             <span className="text-xs font-medium text-gray-500">Last 6 months</span>
           </div>
-          
+
           <div className="space-y-4">
             {stats.monthly_revenue && stats.monthly_revenue.map((month, index) => {
               const maxRevenue = Math.max(...stats.monthly_revenue.map(m => m.revenue));
               const percentage = (month.revenue / maxRevenue) * 100;
-              
+
               return (
                 <div key={index} className="space-y-1">
                   <div className="flex justify-between text-sm">
@@ -191,7 +190,7 @@ export default function AdminRevenue() {
                     <span className="font-semibold text-gray-900">{formatCurrency(month.revenue)}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
+                    <div
                       className="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
                       style={{ width: `${percentage}%` }}
                     ></div>
@@ -208,21 +207,21 @@ export default function AdminRevenue() {
             <h3 className="text-lg font-semibold text-gray-900">Top Performing Workers</h3>
             <span className="text-xs font-medium text-gray-500">By earnings</span>
           </div>
-          
+
           <div className="space-y-4">
             {stats.top_workers.map((worker, index) => {
               const maxEarning = Math.max(...stats.top_workers.map(w => w.earning));
               const percentage = (worker.earning / maxEarning) * 100;
-              
+
               return (
                 <div key={index} className="group hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
-                        ${index === 0 ? 'bg-yellow-100 text-yellow-700' : 
-                          index === 1 ? 'bg-gray-100 text-gray-700' : 
-                          index === 2 ? 'bg-orange-100 text-orange-700' : 
-                          'bg-blue-50 text-blue-600'}`}>
+                        ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                          index === 1 ? 'bg-gray-100 text-gray-700' :
+                            index === 2 ? 'bg-orange-100 text-orange-700' :
+                              'bg-blue-50 text-blue-600'}`}>
                         #{index + 1}
                       </span>
                       <span className="font-medium text-gray-900">{worker.worker}</span>
@@ -230,12 +229,12 @@ export default function AdminRevenue() {
                     <span className="font-semibold text-gray-900">{formatCurrency(worker.earning)}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className={`h-2 rounded-full transition-all duration-500
-                        ${index === 0 ? 'bg-yellow-500' : 
-                          index === 1 ? 'bg-gray-500' : 
-                          index === 2 ? 'bg-orange-500' : 
-                          'bg-blue-500'}`}
+                        ${index === 0 ? 'bg-yellow-500' :
+                          index === 1 ? 'bg-gray-500' :
+                            index === 2 ? 'bg-orange-500' :
+                              'bg-blue-500'}`}
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>
