@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { aiApi } from "../../../api/axios";
-import { 
-  X, 
-  Send, 
-  Cpu, 
-  Zap, 
-  HardDrive, 
-  Monitor, 
+import {
+  X,
+  Send,
+  Cpu,
+  Zap,
+  HardDrive,
+  Monitor,
   DollarSign,
   RefreshCw,
   Info,
@@ -65,8 +65,8 @@ const AiAssistantModal = ({ onClose }) => {
 
   const totalPrice = build
     ? Object.values(build).reduce((total, item) => {
-        return total + (item?.price || 0);
-      }, 0)
+      return total + (item?.price || 0);
+    }, 0)
     : 0;
 
   return (
@@ -239,15 +239,15 @@ const AiAssistantModal = ({ onClose }) => {
                     build[key] ? (
                       <div key={key} className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-md transition-all duration-200 hover:border-cyan-500/20 hover:bg-white/8 hover:shadow-[0_0_10px_rgba(0,255,255,0.07)]">
                         <div className="rounded-lg border border-white/10 bg-white/10 p-1.5">
-                          {key === "cpu"        && <Cpu className="w-4 h-4 text-blue-400" />}
-                          {key === "gpu"        && <Monitor className="w-4 h-4 text-purple-400" />}
-                          {key === "motherboard"&& <CircuitBoard className="w-4 h-4 text-indigo-400" />}
-                          {key === "ram"        && <MemoryStick className="w-4 h-4 text-green-400" />}
-                          {key === "storage"    && <HardDrive className="w-4 h-4 text-yellow-400" />}
-                          {key === "psu"        && <Plug className="w-4 h-4 text-orange-400" />}
-                          {key === "case"       && <Box className="w-4 h-4 text-gray-400" />}
-                          {key === "cooler"     && <Fan className="w-4 h-4 text-cyan-400" />}
-                          {key === "case_fans"  && <Fan className="w-4 h-4 text-pink-400" />}
+                          {key === "cpu" && <Cpu className="w-4 h-4 text-blue-400" />}
+                          {key === "gpu" && <Monitor className="w-4 h-4 text-purple-400" />}
+                          {key === "motherboard" && <CircuitBoard className="w-4 h-4 text-indigo-400" />}
+                          {key === "ram" && <MemoryStick className="w-4 h-4 text-green-400" />}
+                          {key === "storage" && <HardDrive className="w-4 h-4 text-yellow-400" />}
+                          {key === "psu" && <Plug className="w-4 h-4 text-orange-400" />}
+                          {key === "case" && <Box className="w-4 h-4 text-gray-400" />}
+                          {key === "cooler" && <Fan className="w-4 h-4 text-cyan-400" />}
+                          {key === "case_fans" && <Fan className="w-4 h-4 text-pink-400" />}
                         </div>
                         <div className="flex-1">
                           <p className="text-xs text-gray-500">{label}</p>
@@ -322,12 +322,14 @@ const AiAssistantModal = ({ onClose }) => {
                 <ChevronRight className="w-4 h-4" />
               </button>
             )}
-            <button
-              onClick={onClose}
-              className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-slate-300 backdrop-blur-sm transition hover:bg-white/15 active:scale-95"
-            >
-              Close
-            </button>
+            {!(isBuild && build) && (
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-slate-300 backdrop-blur-sm transition hover:bg-white/15 active:scale-95"
+              >
+                Close
+              </button>
+            )}
           </div>
         </div>
       </motion.div>

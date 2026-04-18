@@ -13,7 +13,7 @@ export default function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, handleLogout } = useAuth();
 
   const isSidebarOpen = sidebarExpanded || sidebarHovered;
 
@@ -52,14 +52,14 @@ export default function AdminLayout() {
           md:hidden
           fixed bottom-6 left-6
           z-50
-          w-14 h-14
+          w-12 h-10
           rounded-full
           bg-blue-600 text-white
           flex items-center justify-center
           shadow-xl
         "
       >
-        <FaBars className="text-xl" />
+        <FaBars className="text-md" />
       </button>
 
       {/* ✅ Mobile Menu — Centered Glassmorphic Popup */}
@@ -161,7 +161,7 @@ export default function AdminLayout() {
       <LogoutModal
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        onConfirm={() => { setLogoutOpen(false); }}
+        onConfirm={handleLogout}
       />
       <SettingsModal
         isOpen={settingsOpen}
