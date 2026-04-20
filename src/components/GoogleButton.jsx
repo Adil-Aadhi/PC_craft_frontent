@@ -12,7 +12,7 @@ const GoogleAuthButton = ({ role, trigger = false, mode = "login" }) => {
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       const res = await axios.post(
-        "http://localhost:8000/api/auth/google/",
+        import.meta.env.VITE_API_URL + "/api/auth/google/",
         {
           access_token: tokenResponse.access_token,
           role: role,
