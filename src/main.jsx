@@ -16,7 +16,8 @@ import { CartProvider } from './cart/context/cartcontext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId="1021812662496-03vmmkqsdskasc4paubrhl3j56nt3u5s.apps.googleusercontent.com">
+    {/* <GoogleOAuthProvider clientId="1021812662496-03vmmkqsdskasc4paubrhl3j56nt3u5s.apps.googleusercontent.com"> */}
+    <GoogleOAuthProvider clientId="233436878841-o3kr8jq5st2lbn4eoemmr2p7ma0kgocu.apps.googleusercontent.com">
     <BrowserRouter>
     <AuthProvider>
       <KycProvider>
