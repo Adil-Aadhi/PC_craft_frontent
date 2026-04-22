@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import LeftPanel from "./LeftPanel";
 import RightCart from "./RightPanel";
@@ -31,7 +31,10 @@ const BuildPC = () => {
   const error = componentsState.error;
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showAiModal, setShowAiModal] = useState(false);
-  const aiInitialized = useRef(false);
+  // Stores the last URL-param fingerprint we processed so that
+  // changing budget / resetting + re-using AI correctly re-triggers the load.
+  const aiLastKey = useRef("");
+  const caseAutoSelected = useRef(false);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth <= 768 : false
   );
@@ -298,12 +301,17 @@ const BuildPC = () => {
   }, [searchParams, dispatch]);
 
   useEffect(() => {
-    if (aiInitialized.current) return;
-
     const hasAIComponents = Object.values(aiComponents).some(Boolean);
     if (!hasAIComponents) return;
 
-    aiInitialized.current = true;
+    // Build a fingerprint of the current AI param set.
+    // If it hasn't changed since last run, skip (prevents re-firing when
+    // componentData updates internally while the params stay the same).
+    const currentKey = Object.values(aiComponents).join("|");
+    if (aiLastKey.current === currentKey) return;
+
+    aiLastKey.current = currentKey;
+    caseAutoSelected.current = true; // prevent auto-case from overriding AI build
     dispatch(clearBuild());
 
     Object.entries(aiComponents).forEach(([category, id]) => {
@@ -323,6 +331,25 @@ const BuildPC = () => {
       }
     });
   }, [componentData, aiComponents, dispatch]);
+
+  // ── Auto-preselect a random case on initial load (once only) ───────────────
+  // Picks a random case from the loaded list so users see different 3D models
+  // each visit. Only fires when: not editing, no AI params, case not yet set.
+  useEffect(() => {
+    if (caseAutoSelected.current) return;          // run only once
+    if (editId) return;                            // skip in edit mode
+    const hasAIComponents = Object.values(aiComponents).some(Boolean);
+    if (hasAIComponents) return;                   // skip when AI filled build
+    if (build.case) return;                        // already has a case
+
+    const items = pcCase?.items;
+    if (!items?.length) return;                    // items not yet loaded
+    const randomIndex = Math.floor(Math.random() * items.length);
+    const firstCase = items[randomIndex];
+
+    caseAutoSelected.current = true;
+    dispatch(addComponent({ category: "case", item: firstCase }));
+  }, [pcCase?.items, build.case, editId, aiComponents, dispatch]);
 
   if (isInitialLoading) {
     if (isMobiles) return null;   // 🔥 hide on mobile
