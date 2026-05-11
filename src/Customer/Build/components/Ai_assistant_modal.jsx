@@ -62,6 +62,7 @@ const AiAssistantModal = ({ onClose }) => {
   const buildData = response?.type === "smart_build" ? response?.result : response;
   const build = buildData?.build;
   const aiExplanation = buildData?.ai_explanation;
+  const warning = buildData?.warning;
 
   const totalPrice = build
     ? Object.values(build).reduce((total, item) => {
@@ -142,6 +143,22 @@ const AiAssistantModal = ({ onClose }) => {
               <p className="text-red-400 text-sm">{response.error}</p>
             </div>
           )}
+
+          {/* Warning - low budget build */}
+            {warning && !loading && (
+              <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <p className="text-amber-400 text-sm">{warning}</p>
+              </div>
+            )}
+
+            {/* Error type - can't build */}
+            {response?.type === "error" && !loading && (
+              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-400 text-sm">{response.answer}</p>
+              </div>
+            )}
 
           {/* Chat Response */}
           {response?.type === "chat" && !loading && (
